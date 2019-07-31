@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --exec babel-node src/server.js"
+    "start": "nodemon --exec babel-node src/server.js",
+    "postinstall": "link-module-alias"
   },
   "author": "",
   "license": "ISC",
@@ -16,15 +17,30 @@
     "dotenv": "^7.0.0",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.7.0",
+    "koa-bodyparser": "^4.2.1",
+    "koa-combine-routers": "^4.0.2",
+    "koa-router": "^7.4.0",
     "lodash": "^4.17.11",
+    "md5": "^2.2.1",
     "mongoose": "^5.4.19",
     "mongoose-auto-increment": "^5.0.1",
     "nodemon": "^1.18.10"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "babel-eslint": "^10.0.2",
     "eslint": "^5.3.0",
     "eslint-config-airbnb": "^17.1.1",
-    "eslint-plugin-import": "^2.18.0"
+    "eslint-import-resolver-alias": "^1.1.2",
+    "eslint-plugin-import": "^2.18.2",
+    "install": "^0.13.0",
+    "link-module-alias": "^1.2.0",
+    "npm": "^6.10.2"
+  },
+  "_moduleAliases": {
+    "@controllers": "./src/controllers",
+    "@utilities": "./src/utilities",
+    "@models": "./src/models",
+    "@config": "./src/config"
   }
 }
