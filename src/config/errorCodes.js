@@ -9,15 +9,15 @@ export default {
     type: 'LOGIN_FAILED',
     message: 'Authentication failed',
   },
-  UserExists: {
+  UserWithEmailExists: {
     status: 409,
-    type: 'USER_EXISTS',
-    message: 'User already exists',
+    type: 'USER_WITH_EMAIL_EXISTS',
+    message: 'User with this email already exists',
   },
   UserNotExists: {
     status: 403,
-    type: 'LOGIN_FAILED',
-    message: 'Authentication failed',
+    type: 'USER_NOT_EXISTS',
+    message: 'User not exists',
   },
   NotAuthorized: {
     status: 403,
@@ -28,5 +28,15 @@ export default {
     status: 409,
     type: 'AUTHORIZATION_TOKEN_EXISTS',
     message: 'User try to be logged in',
+  },
+  ClubWithNameExists: {
+    status: 409,
+    type: 'CLUB_WITH_NANE_EXISTS',
+    message: 'Club with this name already exists',
+  },
+  RelationsNotUnique: {
+    status: 409,
+    type: 'RELATIONS_NOT_UNIQUE',
+    message: 'Relations have to be unique, club cannot have two different relations to the same club',
   },
 };

@@ -3,21 +3,25 @@ import mongoose, { mongo } from 'mongoose';
 const { Schema } = mongoose;
 
 const RelationSchema = new Schema({
-  _from: {
+  from: {
     type: Schema.Types.ObjectId,
     ref: 'Club',
+    required: true,
   },
-  _to: {
+  to: {
     type: Schema.Types.ObjectId,
     ref: 'Club',
+    required: true,
   },
   direction: {
     type: String,
     enum: ['one-way', 'two-way'],
+    required: true,
   },
   type: {
     type: String,
-    enum: ['friendship', 'agreement', 'satellite', 'positive', 'hostility'],
+    enum: ['friendship', 'agreement', 'satellite', 'positive'],
+    required: true,
   },
 }, {
   timestamps: true,

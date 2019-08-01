@@ -15,7 +15,7 @@ export const isNotLogged = async (ctx, next) => {
 export const retrieveUser = async (ctx, next) => {
   const { authorization } = ctx.headers;
 
-  if (!authorization.startsWith('Bearer ')) throw new ApiError(errorCodes.JWTToken);
+  if (!authorization || !authorization.startsWith('Bearer ')) throw new ApiError(errorCodes.JWTToken);
 
   const [, token] = authorization.split(' ');
 

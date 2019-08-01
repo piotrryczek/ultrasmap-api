@@ -7,10 +7,16 @@ import { retrieveUser, hasCredential, isNotLogged } from '@utilities/middlewares
 const router = new Router({ prefix: '/users' });
 
 router.get(
+  '/:userId',
+  retrieveUser,
+  hasCredential('getUser'),
+  UsersController.get,
+);
+router.get(
   '/',
   retrieveUser,
   hasCredential('getUser'),
-  UsersController.getAll,
+  UsersController.getPaginated,
 );
 router.post(
   '/register',
@@ -26,6 +32,18 @@ router.post(
   retrieveUser,
   hasCredential('updateUser'),
   UsersController.add,
+);
+router.put(
+  '/:userId',
+  retrieveUser,
+  hasCredential('updateUser'),
+  UsersController.update,
+);
+router.delete(
+  '/:userId',
+  retrieveUser,
+  hasCredential('updateUser'),
+  UsersController.remove,
 );
 
 export default router;

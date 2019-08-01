@@ -11,11 +11,9 @@ class AuthController {
 
     const { name, email, password } = body;
 
-    const isFoundUser = await User.findOne({
-      email,
-    });
+    const isUserWithEmail = await User.findOne({ email });
 
-    if (isFoundUser) throw new ApiError(errorCodes.UserExists);
+    if (isUserWithEmail) throw new ApiError(errorCodes.UserWithEmailExists);
 
     const hashedPassword = md5(password);
 
@@ -50,7 +48,7 @@ class AuthController {
     }, process.env.JWT_SECRET);
 
     ctx.body = {
-      token,
+      data: token,
     };
   }
 }
