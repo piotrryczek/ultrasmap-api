@@ -1,11 +1,10 @@
-import _uniq from 'lodash/uniq';
-
 import {
   PER_PAGE,
 } from '@config/config';
 import {
   createRelationsPromises,
   getRelationsToEdit,
+  createSatellitesPromises,
 } from '@utilities/helpers';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
@@ -76,38 +75,37 @@ class ClubsController {
       satelliteOf,
     });
 
-    const allRelations = [satelliteOf, ...friendships, ...agreements, ...positives, ...satellites];
-    const uniqueRelations = _uniq(allRelations);
-
-    if (allRelations.length !== uniqueRelations.length) throw new ApiError(errorCodes.RelationsNotUnique);
-
+    if (!newClub.validateRelations()) throw new ApiError(errorCodes.RelationsNotUnique);
     await newClub.validate();
+    
+    // Saving
     const { _id: newClubId } = await newClub.save();
 
+    // Satellites
+    const { finalSatellites, satellitesPromises } = createSatellitesPromises(newClubId, satellites, 'add', true);
+    await Promise.all(satellitesPromises);
+
+    if (satellites.length !== finalSatellites.length) {
+      Object.assign(newClub, {
+        satellites: finalSatellites, // Cannot override
+      });
+
+      await newClub.save();
+    }
+
+    // Friendships
     const friendshipsPromises = createRelationsPromises(newClubId, friendships, 'friendships', 'add');
     await Promise.all(friendshipsPromises);
 
+    // Agreements
     const agreementsPromises = createRelationsPromises(newClubId, agreements, 'agreements', 'add');
     await Promise.all(agreementsPromises);
 
+    // Positives
     const positivesPromises = createRelationsPromises(newClubId, positives, 'positives', 'add');
     await Promise.all(positivesPromises);
 
-    const satellitesPromises = satellites.map(satelliteId => new Promise(async (resolve, reject) => {
-      const club = await Club.findById(satelliteId);
-
-      if (!club.satelliteOf) {
-        Object.assign(club, {
-          satelliteOf: satelliteId,
-        });
-
-        await club.save();
-      }
-
-      resolve();
-    }));
-    await Promise.all(satellitesPromises);
-
+    // SatelliteOf
     if (satelliteOf) {
       const club = await Club.findById(satelliteOf);
       const { satellites: clubSatellites } = club;
@@ -125,9 +123,14 @@ class ClubsController {
   }
 
   update = async (ctx) => {
-    const { params, request } = ctx;
-    const { body } = request;
-    const { clubId } = params;
+    const {
+      params: {
+        clubId,
+      },
+      request: {
+        body,
+      },
+    } = ctx;
 
     const clubBeforeUpdate = await Club.findById(clubId);
     const {
@@ -150,22 +153,39 @@ class ClubsController {
       satelliteOf = null,
     } = body;
 
-    const club = await Club.findById(clubId);
+    const clubToBeUpdated = await Club.findById(clubId);
 
-    Object.assign(club, {
-      // name,
-      // logo,
-      // tier,
-      // location,
+    Object.assign(clubToBeUpdated, {
+      name,
+      logo,
+      tier,
+      location,
       friendships,
       agreements,
       positives,
       satellites,
-      // satelliteOf,
+      satelliteOf,
     });
 
-    await club.validate();
-    await club.save();
+    if (!clubToBeUpdated.validateRelations()) throw new ApiError(errorCodes.RelationsNotUnique);
+    await clubToBeUpdated.validate();
+
+    // Satellites
+    const {
+      toAdd: satellitesToAdd,
+      toRemove: satellitesToRemove,
+    } = getRelationsToEdit(prevSatellites, satellites);
+    const { finalSatellites, satellitesPromises: satellitesToAddPromises } = createSatellitesPromises(clubId, satellitesToAdd, 'add', true);
+    const { satellitesPromises: satellitesToRemovePromises } = createSatellitesPromises(clubId, satellitesToRemove, 'remove', true);
+
+    await Promise.all(satellitesToAddPromises, satellitesToRemovePromises);
+
+    // Saving
+    Object.assign(clubToBeUpdated, {
+      satellites: finalSatellites, // Cannot override
+    });
+
+    await clubToBeUpdated.save();
 
     // Friendships
     const {
@@ -194,12 +214,28 @@ class ClubsController {
     const positivesToRemovePromises = createRelationsPromises(clubId, positivesToRemove, 'positives', 'remove');
     await Promise.all(positivesToAddPromises, positivesToRemovePromises);
 
-    // Satellites
-
     // SatelliteOf
+    if (satelliteOf) { // adding satellite to satellites
+      const club = await Club.findById(satelliteOf);
+      const { satellites: clubSatellites } = club;
 
+      Object.assign(club, {
+        satellites: [...clubSatellites, clubId],
+      });
 
+      await club.save();
+    }
 
+    if (prevSatelliteOf !== satelliteOf) { // removing
+      const club = await Club.findById(prevSatelliteOf);
+      const { satellites: clubSatellites } = club;
+
+      Object.assign(club, {
+        satellites: clubSatellites.filter(satelliteId => satelliteId.toString() !== clubId),
+      });
+
+      await club.save();
+    }
 
     ctx.body = {
       success: true,

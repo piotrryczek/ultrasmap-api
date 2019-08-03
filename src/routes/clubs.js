@@ -5,7 +5,6 @@ import { retrieveUser, hasCredential } from '@utilities/middlewares';
 
 const router = new Router({ prefix: '/clubs' });
 
-router.get('/abc', (ctx) => { ctx.body = { data: 'odpowiedz' }; });
 router.get('/', ClubsController.getPaginated);
 router.get('/:clubId', ClubsController.get);
 router.post(

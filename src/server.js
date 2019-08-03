@@ -1,8 +1,10 @@
 /**
- * @todo infuture:
- * verification email
- * reseting password
+ * TODO:
+ * - verification email
+ * - reseting password
  */
+
+import 'module-alias/register';
 
 import '@config/env';
 import app from './app';

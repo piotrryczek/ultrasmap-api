@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "babel src --out-dir dist --copy-files node dist/server.js",
     "start-dev": "nodemon --exec babel-node src/server.js",
     "postinstall": "link-module-alias",
     "test": "jest --detectOpenHandles"
@@ -23,10 +22,13 @@
     "koa-bodyparser": "^4.2.1",
     "koa-combine-routers": "^4.0.2",
     "koa-router": "^7.4.0",
+    "link-module-alias": "^1.2.0",
     "lodash": "^4.17.11",
     "md5": "^2.2.1",
+    "module-alias": "^2.2.1",
     "mongoose": "^5.4.19",
     "mongoose-auto-increment": "^5.0.1",
+    "node-cron": "^2.0.3",
     "nodemon": "^1.18.10",
     "supertest": "^4.0.2"
   },
@@ -37,9 +39,10 @@
     "eslint-config-airbnb": "^17.1.1",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.14.3",
     "install": "^0.13.0",
     "jest": "^24.8.0",
-    "link-module-alias": "^1.2.0",
     "npm": "^6.10.2"
   },
   "_moduleAliases": {

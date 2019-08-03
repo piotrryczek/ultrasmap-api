@@ -16,37 +16,50 @@ const fullObjectData = {
       required: true,
     },
   },
-  relations: [{
-    _from: {
-      type: Schema.Types.ObjectId,
-      ref: 'Club',
-    },
-    _to: {
-      type: Schema.Types.ObjectId,
-      ref: 'Club',
-    },
-    direction: {
-      type: String,
-      enum: ['one-way', 'two-way'],
-    },
-    type: {
-      type: String,
-      enum: ['friendship', 'agreement', 'satellite', 'positive', 'hostility'],
-    },
+  friendships: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Club',
   }],
+  agreements: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Club',
+  }],
+  positives: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Club',
+  }],
+  satellites: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Club',
+  }],
+  satelliteOf: {
+    type: Schema.Types.ObjectId,
+    ref: 'Club',
+  },
 };
 
 const SuggestionSchema = new Schema({
-  _objectFor: {
-    type: Schema.Types.ObjectId,
-    ref: 'ObjectFor',
-  },
   type: {
     type: String,
     enum: ['new', 'edit'],
+    required: true,
   },
+  status: {
+    type: String,
+    enum: ['pending', 'applied', 'rejected'],
+    required: true,
+  },
+  comments: [{
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    text: {
+      type: String,
+    },
+  }],
   objectDataBefore: fullObjectData,
-  objectDataUpdated: fullObjectData,
+  objectDataAfter: fullObjectData,
 }, {
   timestamps: true,
 });

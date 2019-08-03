@@ -1,3 +1,6 @@
+/* eslint-disable func-names */
+import _uniq from 'lodash/uniq';
+
 import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
@@ -46,6 +49,23 @@ const ClubSchema = new Schema({
   },
 }, {
   timestamps: true,
+});
+
+ClubSchema.method('validateRelations', function () {
+  const {
+    satelliteOf = null,
+    friendships = [],
+    agreements = [],
+    positives = [],
+    satellites = [],
+  } = this;
+
+  const allRelations = [satelliteOf, ...friendships, ...agreements, ...positives, ...satellites];
+  const uniqueRelations = _uniq(allRelations);
+
+  if (allRelations.length !== uniqueRelations.length) return false;
+
+  return true;
 });
 
 export default mongoose.model('Club', ClubSchema);

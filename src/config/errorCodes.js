@@ -39,4 +39,9 @@ export default {
     type: 'RELATIONS_NOT_UNIQUE',
     message: 'Relations have to be unique, club cannot have two different relations to the same club',
   },
+  incompleteSuggestionComment: {
+    status: 409,
+    type: 'INCOMPLETE_SUGGESTION_COMMENT',
+    message: 'Author or/and comment text does not exist',
+  },
 };

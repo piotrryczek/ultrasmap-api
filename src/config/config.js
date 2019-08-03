@@ -6,3 +6,9 @@ export const relationTypes = {
   positive: 'positive',
   satellite: 'satellite',
 };
+
+export const suggestionStatuses = {
+  pending: 'pending',
+  applied: 'applied',
+  rejected: 'rejected',
+};

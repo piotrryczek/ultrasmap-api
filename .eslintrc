@@ -3,6 +3,8 @@
   "rules": {
     "linebreak-style": 0,
     "indent": ["error", 2],
+    "max-len": ["error", { "code": 200 }],
+    "import/no-extraneous-dependencies": false,
   },
   "parser": "babel-eslint",
   "settings": {
@@ -12,7 +14,7 @@
           ["@controllers", "./src/controllers"],
           ["@utilities", "./src/utilities"],
           ["@models", "./src/models"],
-          ["@config", "./src/config"],
+          ["@config", "./src/config"]
         ],
         "extensions": [".ts", ".js", ".jsx", ".json"]
       }
