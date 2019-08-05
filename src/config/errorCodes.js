@@ -44,4 +44,9 @@ export default {
     type: 'INCOMPLETE_SUGGESTION_COMMENT',
     message: 'Author or/and comment text does not exist',
   },
+  incorrectMockPassword: {
+    status: 403,
+    type: 'INCORRECT_MOCK_PASSWORD',
+    message: 'Incorrect mock password',
+  },
 };

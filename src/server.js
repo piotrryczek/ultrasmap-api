@@ -4,9 +4,10 @@
  * - reseting password
  */
 
-import 'module-alias/register';
-
 import '@config/env';
+import backupCron from '@services/backupCron';
 import app from './app';
 
-app.listen(3000);
+app.listen(3000, () => {
+  backupCron.init();
+});

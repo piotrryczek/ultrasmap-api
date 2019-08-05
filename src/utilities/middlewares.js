@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import md5 from 'md5';
 
 import User from '@models/user';
 import ApiError from '@utilities/apiError';
@@ -45,3 +46,12 @@ export const hasCredential = credential => async (ctx, next) => {
 
   await next();
 };
+
+export const checkMockPassword = async (ctx, next) => {
+  const { request: { body } } = ctx;
+  const { password } = body;
+
+  if (md5(password) !== process.env.MOCK_PASSWORD) throw new ApiError(errorCodes.incorrectMockPassword);
+
+  await next();
+}

@@ -11,6 +11,8 @@ class BackupController {
     const users = await User.find({});
     const clubs = await Club.find({});
 
+    console.log(clubs);
+
   }
 
   restore = (backupFile) => {
