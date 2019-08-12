@@ -64,4 +64,4 @@ const SuggestionSchema = new Schema({
   timestamps: true,
 });
 
-export default mongoose.model('Suggestion', SuggestionSchema);
+export default mongoose.models.Suggestion || mongoose.model('Suggestion', SuggestionSchema);

@@ -77,7 +77,7 @@ class ClubsController {
 
     if (!newClub.validateRelations()) throw new ApiError(errorCodes.RelationsNotUnique);
     await newClub.validate();
-    
+
     // Saving
     const { _id: newClubId } = await newClub.save();
 

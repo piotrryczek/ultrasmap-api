@@ -68,4 +68,4 @@ ClubSchema.method('validateRelations', function () {
   return true;
 });
 
-export default mongoose.model('Club', ClubSchema);
+export default mongoose.models.Club || mongoose.model('Club', ClubSchema);

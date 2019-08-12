@@ -4,7 +4,6 @@
  */
 
 import md5 from 'md5';
-import axios from 'axios';
 
 import Club from '@models/club';
 import User from '@models/user';
@@ -13,16 +12,6 @@ import Suggestion from '@models/suggestion';
 
 class MockData {
   roles = {};
-
-  apiUrl = 'http://localhost:3000';
-
-  postData = (url, data) => {
-    return axios.post(`${this.apiUrl}${url}`, data, {
-      headers: {
-        Authorization: `Bearer ${this.adminToken}`,
-      },
-    });
-  }
 
   insertAll = async () => {
     await this.clearAll();
@@ -50,7 +39,9 @@ class MockData {
         'addSuggestion', // in frontend App by user
         'updateSuggestion',
         'mockData',
+        'createBackup',
         'restoreBackup',
+        'getBackup',
       ],
     };
 
@@ -60,7 +51,9 @@ class MockData {
         'updateClub',
         'getSuggestion',
         'addSuggestion',
-        'updateSuggestion'
+        'updateSuggestion',
+        'createBackup',
+        'getBackup',
       ],
     };
 
@@ -69,7 +62,7 @@ class MockData {
       credentials: [
         'addSuggestion',
       ],
-    }
+    };
 
     const roles = [adminRole, moderatorRole, userRole];
 
@@ -112,17 +105,10 @@ class MockData {
     const users = [admin, moderator, user];
 
     await User.insertMany(users);
-
-    const { data: { data } } = await axios.post(`${this.apiUrl}/users/login`, {
-      email: 'admin@ultrasmap.pl',
-      password: 'admin12',
-    });
-
-    this.adminToken = data;
   }
 
   insertClubs = async () => {
-    const legiaWarszawa = {
+    const legiaWarszawa = new Club({
       name: 'Legia Warszawa',
       logo: 'legia.png',
       tier: 1,
@@ -130,11 +116,9 @@ class MockData {
         type: 'Point',
         coordinates: [5, 5],
       },
-    };
+    });
 
-    const { data: { data: legiaWarszawaId } } = await this.postData('/clubs', legiaWarszawa);
-
-    const olimpiaElblag = {
+    const olimpiaElblag = new Club({
       name: 'Olimpia Elbląg',
       logo: 'olimpia.png',
       tier: 1,
@@ -142,12 +126,9 @@ class MockData {
         type: 'Point',
         coordinates: [5, 5],
       },
-      friendships: [legiaWarszawaId],
-    };
+    });
 
-    await this.postData('/clubs', olimpiaElblag);
-
-    const zaglebieSosnowiec = {
+    const zaglebieSosnowiec = new Club({
       name: 'Zagłębie Sosnowiec',
       logo: 'zaglebie.png',
       tier: 1,
@@ -155,12 +136,9 @@ class MockData {
         type: 'Point',
         coordinates: [5, 5],
       },
-      friendships: [legiaWarszawaId],
-    };
+    });
 
-    await this.postData('/clubs', zaglebieSosnowiec);
-
-    const radomiakRadom = {
+    const radomiakRadom = new Club({
       name: 'Radomiak Radom',
       logo: 'radomiak.png',
       tier: 1,
@@ -168,12 +146,9 @@ class MockData {
         type: 'Point',
         coordinates: [5, 5],
       },
-      friendships: [legiaWarszawaId],
-    };
+    });
 
-    await this.postData('/clubs', radomiakRadom);
-
-    const pogonSzczecin = {
+    const pogonSzczecin = new Club({
       name: 'Pogoń Szczecin',
       logo: 'pogon.png',
       tier: 1,
@@ -181,12 +156,9 @@ class MockData {
         type: 'Point',
         coordinates: [5, 5],
       },
-      positives: [legiaWarszawaId]
-    };
+    });
 
-    await this.postData('/clubs', pogonSzczecin);
-
-    const widzewLodz = {
+    const widzewLodz = new Club({
       name: 'Widzew Łódź',
       logo: 'widzew.png',
       tier: 1,
@@ -194,11 +166,9 @@ class MockData {
         type: 'Point',
         coordinates: [5, 5],
       },
-    };
+    });
 
-    const { data: { data: widzewLodzId } } = await this.postData('/clubs', widzewLodz);
-
-    const ruchChorzow = {
+    const ruchChorzow = new Club({
       name: 'Ruch Chorzów',
       logo: 'ruch.png',
       tier: 1,
@@ -206,12 +176,9 @@ class MockData {
         type: 'Point',
         coordinates: [5, 5],
       },
-      friendships: [widzewLodzId],
-    };
+    });
 
-    const { data: { data: ruchChorzowId } } = await this.postData('/clubs', ruchChorzow);
-
-    const wislaKrakow = {
+    const wislaKrakow = new Club({
       name: 'Wisła Kraków',
       logo: 'wisla.png',
       tier: 1,
@@ -219,12 +186,9 @@ class MockData {
         type: 'Point',
         coordinates: [5, 5],
       },
-      agreements: [widzewLodzId, ruchChorzowId],
-    };
+    });
 
-    await this.postData('/clubs', wislaKrakow);
-
-    const granatSkarzysko = {
+    const granatSkarzysko = new Club({
       name: 'Granat Skarżysko Kamienna',
       logo: 'granat.png',
       tier: 1,
@@ -232,12 +196,9 @@ class MockData {
         type: 'Point',
         coordinates: [5, 5],
       },
-      satelliteOf: widzewLodzId,
-    };
+    });
 
-    const { data: { data: granatSkarzyskoId } } = await this.postData('/clubs', granatSkarzysko);
-
-    const starStarachowice = {
+    const starStarachowice = new Club({
       name: 'Star Starachowice',
       logo: 'star.png',
       tier: 1,
@@ -245,11 +206,75 @@ class MockData {
         type: 'Point',
         coordinates: [5, 5],
       },
-      satelliteOf: widzewLodzId,
-      friendships: [granatSkarzyskoId],
-    };
+    });
 
-    await this.postData('/clubs', starStarachowice);
+    await Promise.all([
+      legiaWarszawa.save(),
+      olimpiaElblag.save(),
+      zaglebieSosnowiec.save(),
+      radomiakRadom.save(),
+      pogonSzczecin.save(),
+      widzewLodz.save(),
+      ruchChorzow.save(),
+      wislaKrakow.save(),
+      granatSkarzysko.save(),
+      starStarachowice.save(),
+    ]);
+
+    Object.assign(legiaWarszawa, {
+      friendships: [olimpiaElblag, radomiakRadom, zaglebieSosnowiec],
+      positives: [pogonSzczecin],
+    });
+
+    Object.assign(olimpiaElblag, {
+      friendships: [legiaWarszawa, zaglebieSosnowiec],
+    });
+
+    Object.assign(zaglebieSosnowiec, {
+      friendships: [legiaWarszawa, olimpiaElblag],
+    });
+
+    Object.assign(pogonSzczecin, {
+      positives: [legiaWarszawa],
+    });
+
+    Object.assign(widzewLodz, {
+      friendships: [ruchChorzow],
+      agreements: [wislaKrakow],
+      satellites: [granatSkarzysko, starStarachowice],
+    });
+
+    Object.assign(ruchChorzow, {
+      friendships: [widzewLodz],
+      agreements: [wislaKrakow],
+    });
+
+    Object.assign(wislaKrakow, {
+      agreements: [widzewLodz, ruchChorzow],
+    });
+
+    Object.assign(granatSkarzysko, {
+      satelliteOf: widzewLodz,
+      friendships: [starStarachowice],
+    });
+
+    Object.assign(starStarachowice, {
+      satelliteOf: widzewLodz,
+      friendships: [granatSkarzysko],
+    });
+
+    await Promise.all([
+      legiaWarszawa.save(),
+      olimpiaElblag.save(),
+      zaglebieSosnowiec.save(),
+      radomiakRadom.save(),
+      pogonSzczecin.save(),
+      widzewLodz.save(),
+      ruchChorzow.save(),
+      wislaKrakow.save(),
+      granatSkarzysko.save(),
+      starStarachowice.save(),
+    ]);
   }
 
   insertSuggestions = async () => {

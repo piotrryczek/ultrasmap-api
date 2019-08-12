@@ -1,4 +1,5 @@
 export const PER_PAGE = 10;
+export const CRON_INTERVAL_HOURS = 6; // every 6 hours
 
 export const relationTypes = {
   friendship: 'friendship',
