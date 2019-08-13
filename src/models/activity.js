@@ -3,7 +3,45 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const ActivitySchema = new Schema({
-
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  originalObject: {
+    type: Schema.Types.ObjectId,
+  },
+  objectType: {
+    type: String,
+    enum: [
+      'club',
+      'user',
+      'backup',
+      'mock',
+    ],
+    required: true,
+  },
+  actionType: {
+    type: String,
+    enum: [
+      'add',
+      'remove',
+      'update',
+      'create', // backup
+      'restore', // backup
+      'insert', // mock
+    ],
+    required: true,
+  },
+  before: {
+    type: Schema.Types.Mixed,
+  },
+  after: {
+    type: Schema.Types.Mixed,
+  },
+  metaData: {
+    type: Schema.Types.Mixed,
+  },
 }, {
   timestamps: true,
 });

@@ -1,3 +1,5 @@
+import _cloneDeep from 'lodash/cloneDeep';
+
 import {
   PER_PAGE,
 } from '@config/config';
@@ -10,8 +12,7 @@ import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
 
 import Club from '@models/club';
-// import Relation from '@models/relation';
-
+import Activity from '@models/activity';
 
 class ClubsController {
   getPaginated = async (ctx) => {
@@ -44,7 +45,12 @@ class ClubsController {
   }
 
   add = async (ctx) => {
-    const { body } = ctx.request;
+    const {
+      user,
+      request: {
+        body,
+      },
+    } = ctx;
 
     const {
       name,
@@ -117,6 +123,16 @@ class ClubsController {
       await club.save();
     }
 
+    const activity = new Activity({
+      user,
+      originalObject: newClub,
+      objectType: 'club',
+      actionType: 'add',
+      after: newClub,
+    });
+
+    await activity.save();
+
     ctx.body = {
       data: newClubId,
     };
@@ -124,6 +140,7 @@ class ClubsController {
 
   update = async (ctx) => {
     const {
+      user,
       params: {
         clubId,
       },
@@ -154,6 +171,7 @@ class ClubsController {
     } = body;
 
     const clubToBeUpdated = await Club.findById(clubId);
+    const clubToBeUpdatedOriginal = _cloneDeep(clubToBeUpdated);
 
     Object.assign(clubToBeUpdated, {
       name,
@@ -237,16 +255,44 @@ class ClubsController {
       await club.save();
     }
 
+    const activity = new Activity({
+      user,
+      originalObject: clubToBeUpdated,
+      objectType: 'club',
+      actionType: 'update',
+      before: clubToBeUpdatedOriginal,
+      after: clubToBeUpdated,
+    });
+
+    await activity.save();
+
     ctx.body = {
       success: true,
     };
   }
 
   remove = async (ctx) => {
-    const { params } = ctx;
-    const { clubId } = params;
+    const {
+      user,
+      params: {
+        clubId,
+      },
+    } = ctx;
 
-    await Club.findByIdAndRemove(clubId);
+    const clubToBeRemoved = await Club.findById(clubId);
+    const clubToBeRemovedOriginal = _cloneDeep(clubToBeRemoved);
+    await clubToBeRemoved.remove();
+
+    const activity = new Activity({
+      user,
+      originalObject: null,
+      objectType: 'club',
+      actionType: 'remove',
+      before: clubToBeRemovedOriginal,
+      after: null,
+    });
+
+    await activity.save();
 
     ctx.body = {
       success: true,

@@ -9,6 +9,7 @@ import Club from '@models/club';
 import User from '@models/user';
 import Role from '@models/role';
 import Suggestion from '@models/suggestion';
+import Activity from '@models/activity';
 
 class MockData {
   roles = {};
@@ -26,6 +27,7 @@ class MockData {
     await User.deleteMany({});
     await Club.deleteMany({});
     await Suggestion.deleteMany({});
+    await Activity.deleteMany({});
   }
 
   insertRoles = async () => {
@@ -42,6 +44,7 @@ class MockData {
         'createBackup',
         'restoreBackup',
         'getBackup',
+        'getActivities',
       ],
     };
 

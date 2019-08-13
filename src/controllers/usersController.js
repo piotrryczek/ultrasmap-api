@@ -1,8 +1,11 @@
 import md5 from 'md5';
+import _cloneDeep from 'lodash/cloneDeep';
 
 import { PER_PAGE } from '@config/config';
 
 import User from '@models/user';
+import Activity from '@models/activity';
+
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
 
@@ -37,7 +40,8 @@ class UsersController {
   }
 
   add = async (ctx) => {
-    const { body } = ctx.request;
+    const { user, request } = ctx;
+    const { body } = request;
     const {
       name,
       email,
@@ -49,15 +53,26 @@ class UsersController {
 
     if (isUserWithEmail) throw new ApiError(errorCodes.UserWithEmailExists);
 
-    const user = new User({
+    const newUser = new User({
       name,
       email,
       password: md5(password),
       role,
     });
 
-    await user.validate();
-    const { _id: newUserId } = await user.save();
+    await newUser.validate();
+    const { _id: newUserId } = await newUser.save();
+
+    const activity = new Activity({
+      user,
+      originalObject: newUser,
+      objectType: 'user',
+      actionType: 'add',
+      before: null,
+      after: newUser,
+    });
+
+    await activity.save();
 
     ctx.body = {
       success: newUserId,
@@ -65,7 +80,7 @@ class UsersController {
   }
 
   update = async (ctx) => {
-    const { params, request } = ctx;
+    const { params, request, user } = ctx;
     const { body } = request;
     const { userId } = params;
 
@@ -79,18 +94,31 @@ class UsersController {
 
     if (isUserWithEmail) throw new ApiError(errorCodes.UserWithEmailExists);
 
-    const user = await User.findById(userId);
+    const userToBeUpdated = await User.findById(userId);
 
-    if (!user) throw new ApiError(errorCodes.UserNotExists);
+    if (!userToBeUpdated) throw new ApiError(errorCodes.UserNotExists);
 
-    Object.assign(user, {
+    const userToBeUpdatedOriginal = _cloneDeep(userToBeUpdated);
+
+    Object.assign(userToBeUpdated, {
       name,
       email,
       role,
     });
 
-    await user.validate();
-    await user.save();
+    await userToBeUpdated.validate();
+    await userToBeUpdated.save();
+
+    const activity = new Activity({
+      user,
+      originalObject: userToBeUpdated,
+      objectType: 'user',
+      actionType: 'update',
+      before: userToBeUpdatedOriginal,
+      after: userToBeUpdated,
+    });
+
+    await activity.save();
 
     ctx.body = {
       success: true,
@@ -98,10 +126,23 @@ class UsersController {
   }
 
   remove = async (ctx) => {
-    const { params } = ctx;
+    const { params, user } = ctx;
     const { userId } = params;
 
-    await User.findByIdAndRemove(userId);
+    const userToBeRemoved = await User.findById(userId);
+    const userToBeRemovedOriginal = _cloneDeep(userToBeRemoved);
+    await userToBeRemoved.remove();
+
+    const activity = new Activity({
+      user,
+      originalObject: null,
+      objectType: 'user',
+      actionType: 'remove',
+      before: userToBeRemovedOriginal,
+      after: null,
+    });
+
+    await activity.save();
 
     ctx.body = {
       success: true,

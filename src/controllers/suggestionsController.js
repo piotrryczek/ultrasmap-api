@@ -1,5 +1,8 @@
+import _cloneDeep from 'lodash/cloneDeep';
+
 import { suggestionStatuses, PER_PAGE } from '@config/config';
 import Suggestion from '@models/suggestion';
+import Activity from '@models/activity';
 
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
@@ -86,10 +89,27 @@ class SuggestionsController {
   }
 
   remove = async (ctx) => {
-    const { params } = ctx;
-    const { suggestionId } = params;
+    const {
+      user,
+      params: {
+        suggestionId,
+      },
+    } = ctx;
 
-    await Suggestion.findByIdAndDelete(suggestionId);
+    const suggestionToBeRemoved = await Suggestion.findById(suggestionId);
+    const suggestionToBeRemovedOriginal = _cloneDeep(suggestionToBeRemoved);
+    await suggestionToBeRemoved.remove();
+
+    const activity = new Activity({
+      user,
+      originalObject: null,
+      objectType: 'suggestion',
+      actionType: 'remove',
+      before: suggestionToBeRemovedOriginal,
+      after: null,
+    });
+
+    await activity.save();
 
     ctx.body = {
       success: true,
@@ -103,7 +123,7 @@ class SuggestionsController {
       },
       request: {
         body,
-      }
+      },
     } = ctx;
 
     const { authorId, text } = body;

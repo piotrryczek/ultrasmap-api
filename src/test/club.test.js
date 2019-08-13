@@ -81,7 +81,7 @@ describe('POST /club', () => {
       .post('/clubs')
       .set('Authorization', `Bearer ${jwt}`)
       .send(clubSecondObj);
-      
+
     const { body: { data: firstClubData } } = await request.get(`/clubs/${clubFirstId}`);
     const { body: { data: secondClubData } } = await request.get(`/clubs/${clubSecondId}`);
 
