@@ -2,6 +2,7 @@ import md5 from 'md5';
 import _cloneDeep from 'lodash/cloneDeep';
 
 import { PER_PAGE } from '@config/config';
+import { parseSearchQuery } from '@utilities/helpers';
 
 import User from '@models/user';
 import Activity from '@models/activity';
@@ -23,19 +24,27 @@ class UsersController {
 
   getPaginated = async (ctx) => {
     const { query } = ctx;
-    const { page } = query;
+    const {
+      page = 1,
+      search = '{}',
+    } = query;
+
+    const parsedSearch = parseSearchQuery(JSON.parse(search));
 
     const users = await User.find(
-      null,
+      parsedSearch,
       null,
       {
         skip: (page - 1) * PER_PAGE,
         limit: PER_PAGE,
       },
-    );
+    ).populate('role', 'name');
+
+    const allCount = await User.countDocuments(parsedSearch);
 
     ctx.body = {
       data: users,
+      allCount,
     };
   }
 

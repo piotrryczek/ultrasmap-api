@@ -5,6 +5,7 @@
 
 import _intersection from 'lodash/intersection';
 import _uniq from 'lodash/uniq';
+import fromEntries from 'object.fromentries';
 
 import Club from '@models/club';
 
@@ -67,3 +68,5 @@ export const createSatellitesPromises = (satelliteOfId, satellites = [], operati
     satellitesPromises,
   };
 };
+
+export const parseSearchQuery = searchQuery => fromEntries(Object.entries(searchQuery).map(([key, value]) => ([key, new RegExp(value, 'i')])));

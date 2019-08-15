@@ -10,7 +10,7 @@ import { CRON_INTERVAL_HOURS } from '@config/config';
 
 class BackupCron {
   init = async () => {
-    cron.schedule(`* * */${CRON_INTERVAL_HOURS} * * *`, () => {
+    cron.schedule(`0 0 */${CRON_INTERVAL_HOURS} * * *`, () => {
       Backup.create();
     });
   }

@@ -1,5 +1,6 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
+import cors from '@koa/cors';
 
 import db from '@config/db';
 import router from './routes';
@@ -12,6 +13,7 @@ db.once('open', () => {
 });
 
 const app = new Koa();
+app.use(cors());
 app.use(bodyParser());
 
 app.use(async (ctx, next) => {

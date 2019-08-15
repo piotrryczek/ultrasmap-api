@@ -7,6 +7,7 @@ import {
   createRelationsPromises,
   getRelationsToEdit,
   createSatellitesPromises,
+  parseSearchQuery,
 } from '@utilities/helpers';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
@@ -17,10 +18,15 @@ import Activity from '@models/activity';
 class ClubsController {
   getPaginated = async (ctx) => {
     const { query } = ctx;
-    const { page } = query;
+    const {
+      page = 1,
+      search = '{}',
+    } = query;
+
+    const parsedSearch = parseSearchQuery(JSON.parse(search));
 
     const clubs = await Club.find(
-      null,
+      parsedSearch,
       null,
       {
         skip: (page - 1) * PER_PAGE,
@@ -28,8 +34,11 @@ class ClubsController {
       },
     );
 
+    const allCount = await Club.countDocuments(parsedSearch);
+
     ctx.body = {
       data: clubs,
+      allCount,
     };
   }
 
