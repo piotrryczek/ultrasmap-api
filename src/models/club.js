@@ -68,4 +68,39 @@ ClubSchema.method('validateRelations', function () {
   return true;
 });
 
+ClubSchema.post('remove', async function (document, next) {
+  const { _id: clubId } = document;
+
+  const Club = this.model('Club');
+
+  await Promise.all([
+    Club.updateMany(
+      {},
+      {
+        $pull: {
+          agreements: clubId,
+          friendships: clubId,
+          positives: clubId,
+          satellites: clubId,
+        },
+      },
+      {
+        multi: true,
+      },
+    ),
+    Club.updateMany(
+      {
+        satelliteOf: clubId,
+      },
+      {
+        $unset: {
+          satelliteOf: null,
+        },
+      },
+    ),
+  ]);
+
+  next();
+});
+
 export default mongoose.models.Club || mongoose.model('Club', ClubSchema);

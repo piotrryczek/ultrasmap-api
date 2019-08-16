@@ -1,10 +1,19 @@
 class ApiError extends Error {
-  constructor(errorObj) {
-    const { status, type, message } = errorObj;
+  constructor(errorObj, nativeError = null) {
+    const {
+      status,
+      type,
+      message, // API response
+    } = errorObj;
 
-    super(message);
+    if (nativeError) {
+      super(nativeError.message);
+    } else {
+      super(message);
+    }
 
     Object.assign(this, {
+      userMessage: message,
       status,
       type,
     });

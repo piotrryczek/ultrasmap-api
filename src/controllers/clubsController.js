@@ -8,6 +8,7 @@ import {
   getRelationsToEdit,
   createSatellitesPromises,
   parseSearchQuery,
+  singleClubDelete,
 } from '@utilities/helpers';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
@@ -159,6 +160,7 @@ class ClubsController {
     } = ctx;
 
     const clubBeforeUpdate = await Club.findById(clubId);
+    
     const {
       friendships: prevFriendships = [],
       agreements: prevAgreements = [],
@@ -178,6 +180,9 @@ class ClubsController {
       satellites = [],
       satelliteOf = null,
     } = body;
+
+    const isClubWithName = await Club.findOne({ name });
+    if (isClubWithName && clubBeforeUpdate.name !== name) throw new ApiError(errorCodes.ClubWithNameExists);
 
     const clubToBeUpdated = await Club.findById(clubId);
     const clubToBeUpdatedOriginal = _cloneDeep(clubToBeUpdated);
@@ -288,23 +293,36 @@ class ClubsController {
       },
     } = ctx;
 
-    const clubToBeRemoved = await Club.findById(clubId);
-    const clubToBeRemovedOriginal = _cloneDeep(clubToBeRemoved);
-    await clubToBeRemoved.remove();
-
-    const activity = new Activity({
-      user,
-      originalObject: null,
-      objectType: 'club',
-      actionType: 'remove',
-      before: clubToBeRemovedOriginal,
-      after: null,
-    });
-
-    await activity.save();
+    await singleClubDelete(user, clubId);
 
     ctx.body = {
       success: true,
+    };
+  }
+
+  bulkRemove = async (ctx) => {
+    const {
+      user,
+      request: {
+        body,
+      },
+    } = ctx;
+    const { ids } = body;
+
+    const removePromises = ids.map(clubId => new Promise(async (resolve, reject) => {
+      try {
+        await singleClubDelete(user, clubId);
+
+        resolve();
+      } catch (error) {
+        reject(new ApiError(errorCodes.Internal, error));
+      }
+    }));
+
+    await Promise.all(removePromises);
+
+    ctx.body = {
+      success: ids,
     };
   }
 }

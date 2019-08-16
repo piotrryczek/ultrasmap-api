@@ -2,7 +2,7 @@
   "extends": "airbnb",
   "rules": {
     "linebreak-style": 0,
-    "indent": ["error", 2],
+    "indent": ["error", 2, { "SwitchCase": 1 }],
     "max-len": ["error", { "code": 200 }],
     "import/no-extraneous-dependencies": false,
   },

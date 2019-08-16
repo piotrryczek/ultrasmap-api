@@ -5,6 +5,32 @@ import User from '@models/user';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
 
+export const errorHandler = async (ctx, next) => {
+  try {
+    await next();
+  } catch (error) {
+    if (error instanceof ApiError) {
+      const { status, type, userMessage } = error;
+
+      ctx.status = status || 500;
+      ctx.body = {
+        message: userMessage,
+        type,
+      };
+    } else {
+      const { status, type, message } = errorCodes.Internal;
+
+      ctx.status = status;
+      ctx.body = {
+        message,
+        type,
+      };
+    }
+
+    ctx.app.emit('error', error);
+  }
+};
+
 export const isNotLogged = async (ctx, next) => {
   const { authorization } = ctx.headers;
 

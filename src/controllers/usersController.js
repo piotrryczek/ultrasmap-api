@@ -2,7 +2,7 @@ import md5 from 'md5';
 import _cloneDeep from 'lodash/cloneDeep';
 
 import { PER_PAGE } from '@config/config';
-import { parseSearchQuery } from '@utilities/helpers';
+import { parseSearchQuery, singleUserRemove } from '@utilities/helpers';
 
 import User from '@models/user';
 import Activity from '@models/activity';
@@ -15,7 +15,7 @@ class UsersController {
     const { params } = ctx;
     const { userId } = params;
 
-    const user = await User.findById(userId).populate('role');
+    const user = await User.findById(userId, '-password').populate('role');
 
     ctx.body = {
       data: user,
@@ -33,7 +33,7 @@ class UsersController {
 
     const users = await User.find(
       parsedSearch,
-      null,
+      '-password',
       {
         skip: (page - 1) * PER_PAGE,
         limit: PER_PAGE,
@@ -58,7 +58,7 @@ class UsersController {
       role,
     } = body;
 
-    const isUserWithEmail = User.findOne({ email });
+    const isUserWithEmail = await User.findOne({ email });
 
     if (isUserWithEmail) throw new ApiError(errorCodes.UserWithEmailExists);
 
@@ -84,7 +84,7 @@ class UsersController {
     await activity.save();
 
     ctx.body = {
-      success: newUserId,
+      data: newUserId,
     };
   }
 
@@ -97,15 +97,16 @@ class UsersController {
       name,
       email,
       role,
+      password = null,
     } = body;
-
-    const isUserWithEmail = await User.findOne({ email });
-
-    if (isUserWithEmail) throw new ApiError(errorCodes.UserWithEmailExists);
 
     const userToBeUpdated = await User.findById(userId);
 
     if (!userToBeUpdated) throw new ApiError(errorCodes.UserNotExists);
+
+    const isUserWithEmail = await User.findOne({ email });
+
+    if (isUserWithEmail && userToBeUpdated.email !== email) throw new ApiError(errorCodes.UserWithEmailExists);
 
     const userToBeUpdatedOriginal = _cloneDeep(userToBeUpdated);
 
@@ -114,6 +115,12 @@ class UsersController {
       email,
       role,
     });
+
+    if (password) {
+      Object.assign(userToBeUpdated, {
+        password: md5(password),
+      });
+    }
 
     await userToBeUpdated.validate();
     await userToBeUpdated.save();
@@ -138,23 +145,36 @@ class UsersController {
     const { params, user } = ctx;
     const { userId } = params;
 
-    const userToBeRemoved = await User.findById(userId);
-    const userToBeRemovedOriginal = _cloneDeep(userToBeRemoved);
-    await userToBeRemoved.remove();
-
-    const activity = new Activity({
-      user,
-      originalObject: null,
-      objectType: 'user',
-      actionType: 'remove',
-      before: userToBeRemovedOriginal,
-      after: null,
-    });
-
-    await activity.save();
+    await singleUserRemove(user, userId);
 
     ctx.body = {
       success: true,
+    };
+  }
+
+  bulkRemove = async (ctx) => {
+    const {
+      user,
+      request: {
+        body,
+      },
+    } = ctx;
+    const { ids } = body;
+
+    const removePromises = ids.map(userId => new Promise(async (resolve, reject) => {
+      try {
+        await singleUserRemove(user, userId);
+
+        resolve();
+      } catch (error) {
+        reject(new ApiError(errorCodes.Internal, error));
+      }
+    }));
+
+    await Promise.all(removePromises);
+
+    ctx.body = {
+      success: ids,
     };
   }
 }

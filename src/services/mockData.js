@@ -4,6 +4,7 @@
  */
 
 import md5 from 'md5';
+import _isEmpty from 'lodash/isEmpty';
 
 import Club from '@models/club';
 import User from '@models/user';
@@ -23,12 +24,55 @@ class MockData {
   }
 
   clearAll = async () => {
+    await Promise.all([
+      this.clearRoles,
+      this.clearUsers,
+      this.clearClubs,
+      this.clearSuggestions,
+      this.clearActivities,
+    ]);
+  }
+
+  clearRoles = async () => {
     await Role.deleteMany({});
+  }
+
+  clearUsers = async () => {
     await User.deleteMany({});
+  }
+
+  clearClubs = async () => {
     await Club.deleteMany({});
+  }
+
+  clearSuggestions = async () => {
     await Suggestion.deleteMany({});
+  }
+
+  clearActivities = async () => {
     await Activity.deleteMany({});
   }
+
+  getRoles = async () => {
+    const adminRole = await Role.findOne({ name: 'admin' });
+    const moderatorRole = await Role.findOne({ name: 'moderator' });
+    const userRole = await Role.findOne({ name: 'user' });
+
+    const roles = [adminRole, moderatorRole, userRole];
+
+    this.roles = this.parseRoles(roles);
+  }
+
+  parseRoles = roles => roles.reduce((acc, role) => {
+    const {
+      name,
+      _id: id,
+    } = role;
+
+    acc[name] = id;
+
+    return acc;
+  }, {});
 
   insertRoles = async () => {
     const adminRole = {
@@ -36,6 +80,8 @@ class MockData {
       credentials: [
         'getUser',
         'updateUser',
+        'getRole',
+        'getClub',
         'updateClub',
         'getSuggestion', // in admin panel
         'addSuggestion', // in frontend App by user
@@ -44,13 +90,14 @@ class MockData {
         'createBackup',
         'restoreBackup',
         'getBackup',
-        'getActivities',
+        'getActivitiy',
       ],
     };
 
     const moderatorRole = {
       name: 'moderator',
       credentials: [
+        'getClub',
         'updateClub',
         'getSuggestion',
         'addSuggestion',
@@ -63,6 +110,7 @@ class MockData {
     const userRole = {
       name: 'user',
       credentials: [
+        'getClub',
         'addSuggestion',
       ],
     };
@@ -71,19 +119,12 @@ class MockData {
 
     const insertedRoles = await Role.insertMany(roles);
 
-    this.roles = insertedRoles.reduce((acc, role) => {
-      const {
-        name,
-        _id: id,
-      } = role;
-
-      acc[name] = id;
-
-      return acc;
-    }, {});
+    this.roles = this.parseRoles(insertedRoles);
   }
 
   insertUsers = async () => {
+    if (_isEmpty(this.roles)) await this.getRoles();
+
     const admin = {
       name: 'admin',
       email: 'admin@ultrasmap.pl',
@@ -98,14 +139,35 @@ class MockData {
       role: this.roles.moderator,
     };
 
-    const user = {
-      name: 'user',
-      email: 'user@ultrasmap.pl',
+    const user1 = {
+      name: 'user1',
+      email: 'user1@ultrasmap.pl',
       password: md5('user12'),
       role: this.roles.user,
     };
 
-    const users = [admin, moderator, user];
+    const user2 = {
+      name: 'user2',
+      email: 'user2@ultrasmap.pl',
+      password: md5('user12'),
+      role: this.roles.user,
+    };
+
+    const user3 = {
+      name: 'user3',
+      email: 'user3@ultrasmap.pl',
+      password: md5('user12'),
+      role: this.roles.user,
+    };
+
+    const user4 = {
+      name: 'user4',
+      email: 'user4@ultrasmap.pl',
+      password: md5('user12'),
+      role: this.roles.user,
+    };
+
+    const users = [admin, moderator, user1, user2, user3, user4];
 
     await User.insertMany(users);
   }

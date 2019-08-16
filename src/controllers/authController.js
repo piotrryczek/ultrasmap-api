@@ -37,7 +37,7 @@ class AuthController {
     const user = await User.findOne({
       password: hashedPassword,
       email,
-    });
+    }).populate('role');
 
     if (!user) throw new ApiError(errorCodes.AuthenticationFailed);
 
@@ -47,8 +47,15 @@ class AuthController {
       },
     }, process.env.JWT_SECRET);
 
+    const { 
+      role: {
+        credentials,
+      },
+    } = user;
+
     ctx.body = {
       data: token,
+      credentials,
     };
   }
 }

@@ -25,5 +25,11 @@ router.delete(
   hasCredential('updateClub'),
   ClubsController.remove,
 );
+router.delete(
+  '/',
+  retrieveUser,
+  hasCredential('updateUser'),
+  ClubsController.bulkRemove,
+);
 
 export default router;

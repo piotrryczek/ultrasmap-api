@@ -1,4 +1,9 @@
 export default {
+  Internal: {
+    status: 500,
+    type: 'INTERNAL',
+    message: 'Internal problem with server',
+  },
   JWTToken: {
     status: 500,
     type: 'JWT_TOKEN',

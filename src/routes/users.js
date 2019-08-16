@@ -40,6 +40,12 @@ router.put(
   UsersController.update,
 );
 router.delete(
+  '/',
+  retrieveUser,
+  hasCredential('updateUser'),
+  UsersController.bulkRemove,
+);
+router.delete(
   '/:userId',
   retrieveUser,
   hasCredential('updateUser'),
