@@ -11,7 +11,23 @@ import Backup from '@services/backup';
 class BackupsController {
   list = async (ctx) => {
     try {
-      const files = await fs.promises.readdir('backups');
+      const fileNames = await fs.promises.readdir('backups');
+
+      const files = fileNames.map((fileName) => {
+        const { birthtime } = fs.statSync(`backups/${fileName}`);
+
+        return {
+          fileName,
+          createdAt: birthtime,
+        };
+      });
+
+      files.sort((fileA, fileB) => {
+        const timestampA = new Date(fileA.createdAt).getTime();
+        const timestampB = new Date(fileB.createdAt).getTime();
+
+        return timestampB - timestampA;
+      });
 
       ctx.body = {
         data: files,
@@ -25,19 +41,19 @@ class BackupsController {
     const { user } = ctx;
     const fileName = await Backup.create();
 
-    const activity = new Activity({
-      user,
-      originalObject: null,
-      objectType: 'backup',
-      actionType: 'create',
-      before: null,
-      after: null,
-      metaData: {
-        fileName,
-      },
-    });
+    // const activity = new Activity({
+    //   user,
+    //   originalObject: null,
+    //   objectType: 'backup',
+    //   actionType: 'create',
+    //   before: null,
+    //   after: null,
+    //   metaData: {
+    //     fileName,
+    //   },
+    // });
 
-    await activity.save();
+    // await activity.save();
 
     ctx.body = {
       data: fileName,
@@ -54,19 +70,19 @@ class BackupsController {
 
     await Backup.restore(fileName);
 
-    const activity = new Activity({
-      user,
-      originalObject: null,
-      objectType: 'backup',
-      actionType: 'restore',
-      before: null,
-      after: null,
-      metaData: {
-        fileName,
-      },
-    });
+    // const activity = new Activity({
+    //   user,
+    //   originalObject: null,
+    //   objectType: 'backup',
+    //   actionType: 'restore',
+    //   before: null,
+    //   after: null,
+    //   metaData: {
+    //     fileName,
+    //   },
+    // });
 
-    await activity.save();
+    // await activity.save();
 
     ctx.body = {
       success: true,

@@ -1,20 +1,17 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
+import serve from 'koa-static';
+import mount from 'koa-mount';
 
 import db from '@config/db';
 
 import { errorHandler } from '@utilities/middlewares';
-import ApiError from '@utilities/apiError';
-import errorCodes from '@config/errorCodes';
 
 import router from './routes';
 
 db.on('error', () => {
   console.log('Mongoose connection error');
-});
-db.once('open', () => {
-  console.log('Mongoose connected');
 });
 
 const app = new Koa();
@@ -27,6 +24,8 @@ app.on('error', (error) => {
   console.log(error);
 });
 
+app.use(mount('/images', serve('./uploads')));
 app.use(router());
+
 
 export default app;

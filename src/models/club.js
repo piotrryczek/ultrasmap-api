@@ -49,6 +49,7 @@ const ClubSchema = new Schema({
   },
 }, {
   timestamps: true,
+  versionKey: false,
 });
 
 ClubSchema.method('validateRelations', function () {

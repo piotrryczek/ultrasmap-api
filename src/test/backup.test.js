@@ -23,6 +23,7 @@ describe('Backup create and restore', () => {
 
     await request.post('/mock').send({
       password: mockPassword,
+      mockType: 'all',
     });
 
     ({ body: { data: jwt } } = await request.post('/users/login').send({
@@ -45,7 +46,7 @@ describe('Backup create and restore', () => {
       roles: backupRoles,
     } = backupData;
 
-    const [dbClubs, dbUsers, dbRoles] = await Promise.all([Club.find({}), User.find({}), Role.find({})]);
+    const [dbClubs, dbUsers, dbRoles] = await Promise.all([Club.find({}, '-__v'), User.find({}, '-__v'), Role.find({}, '-__v')]);
 
     expect(JSON.stringify(dbClubs) === JSON.stringify(backupClubs)).toEqual(true);
     expect(JSON.stringify(dbUsers) === JSON.stringify(backupUsers)).toEqual(true);
@@ -57,6 +58,7 @@ describe('Backup create and restore', () => {
   it('Restore backup', async (done) => {
     const backupDataBufer = await fs.promises.readFile(`backups/${backupFileName}`);
     const backupData = JSON.parse(backupDataBufer);
+
     const {
       clubs: backupClubs,
       users: backupUsers,
@@ -64,14 +66,14 @@ describe('Backup create and restore', () => {
     } = backupData;
 
     await request
-      .post('backups/restore')
+      .post('/backups/restore')
       .set('Authorization', `Bearer ${jwt}`)
       .send({
         fileName: backupFileName,
       });
 
-    const [dbClubs, dbUsers, dbRoles] = await Promise.all([Club.find({}), User.find({}), Role.find({})]);
- 
+    const [dbClubs, dbUsers, dbRoles] = await Promise.all([Club.find({}, '-__v'), User.find({}, '-__v'), Role.find({}, '-__v')]);
+
     expect(JSON.stringify(dbClubs) === JSON.stringify(backupClubs)).toEqual(true);
     expect(JSON.stringify(dbUsers) === JSON.stringify(backupUsers)).toEqual(true);
     expect(JSON.stringify(dbRoles) === JSON.stringify(backupRoles)).toEqual(true);

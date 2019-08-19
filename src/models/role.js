@@ -7,6 +7,7 @@ const RoleSchema = new Schema({
   credentials: [String],
 }, {
   timestamps: true,
+  versionKey: false,
 });
 
 export default mongoose.models.Role || mongoose.model('Role', RoleSchema);

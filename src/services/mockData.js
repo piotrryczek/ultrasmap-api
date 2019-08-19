@@ -15,21 +15,23 @@ import Activity from '@models/activity';
 class MockData {
   roles = {};
 
+  clubs = [];
+
   insertAll = async () => {
     await this.clearAll();
     await this.insertRoles();
     await this.insertUsers();
     await this.insertClubs();
-    // this.insertSuggestions();
+    await this.insertSuggestions();
   }
 
   clearAll = async () => {
     await Promise.all([
-      this.clearRoles,
-      this.clearUsers,
-      this.clearClubs,
-      this.clearSuggestions,
-      this.clearActivities,
+      Role.deleteMany({}),
+      User.deleteMany({}),
+      Club.deleteMany({}),
+      Suggestion.deleteMany({}),
+      Activity.deleteMany({}),
     ]);
   }
 
@@ -78,6 +80,7 @@ class MockData {
     const adminRole = {
       name: 'admin',
       credentials: [
+        'uploadFile',
         'getUser',
         'updateUser',
         'getRole',
@@ -97,6 +100,7 @@ class MockData {
     const moderatorRole = {
       name: 'moderator',
       credentials: [
+        'uploadFile',
         'getClub',
         'updateClub',
         'getSuggestion',
@@ -110,6 +114,7 @@ class MockData {
     const userRole = {
       name: 'user',
       credentials: [
+        'uploadFile',
         'getClub',
         'addSuggestion',
       ],
@@ -328,7 +333,7 @@ class MockData {
       friendships: [granatSkarzysko],
     });
 
-    await Promise.all([
+    this.clubs = await Promise.all([
       legiaWarszawa.save(),
       olimpiaElblag.save(),
       zaglebieSosnowiec.save(),
@@ -343,7 +348,69 @@ class MockData {
   }
 
   insertSuggestions = async () => {
+    const [
+      legiaWarszawa,
+      olimpiaElblag,
+      zaglebieSosnowiec,
+      radomiakRadom,
+      pogonSzczecin,
+      widzewLodz,
+      ruchChorzow,
+      wislaKrakow,
+      granatSkarzysko,
+      starStarachowice,
+    ] = this.clubs;
 
+    // const newSuggestionForLechPoznan = new Suggestion({
+    //   type: 'new',
+    //   status: 'pending',
+    //   original: null,
+    //   data: {
+    //     name: 'Lech Poznań',
+    //     logo: 'lech.png',
+    //     tier: 1,
+    //     location: {
+    //       type: 'Point',
+    //       coordinates: [5, 5],
+    //     },
+    //     friendships: [],
+    //     friendshipsToCreate: ['Arka Gdynia', 'KSZO Ostrowiec Świętokrzyski', 'ŁKS Łódź', 'Cracovia Kraków'],
+    //     agreements: [],
+    //     agreementsToCreate: [],
+    //     positives: [],
+    //     positivesToCreate: ['Zagłębie Lubin', 'Górnik Zabrze'],
+    //   },
+    // });
+
+    const editSuggestionForLegiaWarszawa = new Suggestion({
+      type: 'edit',
+      status: 'pending',
+      original: legiaWarszawa,
+      data: {
+        name: 'Legia Warszawa modified',
+        logo: 'legia_modified.jpg',
+        tier: 2,
+        location: {
+          type: 'Point',
+          coordinates: [19, 19],
+        },
+        friendshipsToCreate: ['Pogoń Siedlce'],
+        friendships: [olimpiaElblag, radomiakRadom, pogonSzczecin, widzewLodz],
+        positivesToCreate: [],
+        positives: [],
+        agreementsToCreate: [],
+        agreements: [],
+        satellites: [],
+        satellitesToCreate: ['Znicz Pruszków'],
+        satelliteOfToCreate: null,
+        satelliteOf: starStarachowice,
+      },
+    });
+
+    await Promise.all([
+      // newSuggestionForLechPoznan.save(),
+      editSuggestionForLegiaWarszawa.save(),
+    ]);
   }
 }
 

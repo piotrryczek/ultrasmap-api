@@ -8,7 +8,7 @@ const router = new Router({ prefix: '/suggestions' });
 router.get(
   '/',
   retrieveUser,
-  hasCredential('viewSuggestion'),
+  hasCredential('getSuggestion'),
   SuggestionsController.getPaginated,
 );
 

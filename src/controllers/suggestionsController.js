@@ -12,22 +12,71 @@ class SuggestionsController {
     const { query } = ctx;
     const {
       page = 1,
+      type,
       status = suggestionStatuses.pending,
     } = query;
 
-    const suggestions = await Suggestion.find(
-      {
-        status,
-      },
-      null,
-      {
-        skip: (page - 1) * PER_PAGE,
-        limit: PER_PAGE,
-      },
-    );
+    const criteria = {
+      status,
+    };
+
+    if (type) {
+      Object.assign(criteria, {
+        type,
+      });
+    }
+
+    const suggestions = await Suggestion
+      .find(
+        criteria,
+        null,
+        {
+          skip: (page - 1) * PER_PAGE,
+          limit: PER_PAGE,
+        },
+      )
+      .populate('original')
+      .populate({ 
+        path: 'original',
+        populate: {
+          path: 'friendships',
+        },
+      })
+      .populate({ 
+        path: 'original',
+        populate: {
+          path: 'agreements',
+        },
+      })
+      .populate({ 
+        path: 'original',
+        populate: {
+          path: 'positives',
+        },
+      })
+      .populate({ 
+        path: 'original',
+        populate: {
+          path: 'satellites',
+        },
+      })
+      .populate({ 
+        path: 'original',
+        populate: {
+          path: 'satelliteOf',
+        },
+      })
+      .populate('data.friendships')
+      .populate('data.agreements')
+      .populate('data.positives')
+      .populate('data.satellites')
+      .populate('data.satelliteOf');
+
+    const allCount = await Suggestion.countDocuments(criteria);
 
     ctx.body = {
       data: suggestions,
+      allCount,
     };
   }
 
@@ -65,8 +114,8 @@ class SuggestionsController {
 
     const {
       type,
-      objectDataBefore,
-      objectDataAfter,
+      clubId,
+      data,
       initialComment = null,
     } = body;
 
@@ -75,8 +124,8 @@ class SuggestionsController {
     const newSuggestion = new Suggestion({
       type,
       status: suggestionStatuses.pending,
-      objectDataBefore,
-      objectDataAfter,
+      original: clubId,
+      data,
       comments,
     });
 

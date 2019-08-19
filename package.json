@@ -23,7 +23,10 @@
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-combine-routers": "^4.0.2",
+    "koa-mount": "^4.0.0",
+    "koa-multer": "^1.0.2",
     "koa-router": "^7.4.0",
+    "koa-static": "^5.0.0",
     "link-module-alias": "^1.2.0",
     "lodash": "^4.17.11",
     "md5": "^2.2.1",
@@ -33,7 +36,10 @@
     "node-cron": "^2.0.3",
     "nodemon": "^1.18.10",
     "object.fromentries": "^2.0.0",
-    "supertest": "^4.0.2"
+    "qs": "^6.8.0",
+    "sharp": "^0.23.0",
+    "supertest": "^4.0.2",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.5.5",

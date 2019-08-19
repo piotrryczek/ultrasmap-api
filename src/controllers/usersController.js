@@ -174,7 +174,8 @@ class UsersController {
     await Promise.all(removePromises);
 
     ctx.body = {
-      success: ids,
+      success: true,
+      data: ids,
     };
   }
 }

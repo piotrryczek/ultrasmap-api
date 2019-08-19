@@ -44,6 +44,7 @@ const ActivitySchema = new Schema({
   },
 }, {
   timestamps: true,
+  versionKey: false,
 });
 
 export default mongoose.models.Activity || mongoose.model('Activity', ActivitySchema);

@@ -9,29 +9,32 @@ const fullObjectData = {
     type: {
       type: String,
       enum: ['Point'],
-      required: true,
     },
     coordinates: {
       type: [Number],
-      required: true,
     },
   },
+  friendshipsToCreate: [String],
   friendships: [{
     type: Schema.Types.ObjectId,
     ref: 'Club',
   }],
+  agreementsToCreate: [String],
   agreements: [{
     type: Schema.Types.ObjectId,
     ref: 'Club',
   }],
+  positivesToCreate: [String],
   positives: [{
     type: Schema.Types.ObjectId,
     ref: 'Club',
   }],
+  satellitesToCreate: [String],
   satellites: [{
     type: Schema.Types.ObjectId,
     ref: 'Club',
   }],
+  satelliteOfToCreate: String,
   satelliteOf: {
     type: Schema.Types.ObjectId,
     ref: 'Club',
@@ -58,10 +61,14 @@ const SuggestionSchema = new Schema({
       type: String,
     },
   }],
-  objectDataBefore: fullObjectData,
-  objectDataAfter: fullObjectData,
+  original: {
+    type: Schema.Types.ObjectId,
+    ref: 'Club',
+  },
+  data: fullObjectData,
 }, {
   timestamps: true,
+  versionKey: false,
 });
 
 export default mongoose.models.Suggestion || mongoose.model('Suggestion', SuggestionSchema);

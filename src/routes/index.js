@@ -7,6 +7,7 @@ import activityRoutes from './activities';
 import roleRoutes from './roles';
 import mockRoutes from './mock';
 import backupsRoutes from './backups';
+import uploadsRoutes from './uploads';
 
 export default combineRouters(
   userRoutes,
@@ -16,4 +17,5 @@ export default combineRouters(
   roleRoutes,
   mockRoutes,
   backupsRoutes,
+  uploadsRoutes,
 );
