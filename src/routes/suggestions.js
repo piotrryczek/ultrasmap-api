@@ -18,21 +18,18 @@ router.post(
   hasCredential('addSuggestion'),
   SuggestionsController.add,
 );
-
-router.patch(
-  '/:suggestionId/status',
-  retrieveUser,
-  hasCredential('updateSuggestion'),
-  SuggestionsController.updateStatus,
-);
-
 router.patch(
   '/:suggestionId/addComment',
   retrieveUser,
   hasCredential('addSuggestion'),
   SuggestionsController.addComment,
 );
-
+router.delete(
+  '/',
+  retrieveUser,
+  hasCredential('updateSuggestion'),
+  SuggestionsController.bulkRemove,
+);
 router.delete(
   '/:suggestionId',
   retrieveUser,

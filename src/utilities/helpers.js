@@ -10,6 +10,7 @@ import fromEntries from 'object.fromentries';
 import Club from '@models/club';
 import User from '@models/user';
 import Activity from '@models/activity';
+import Suggestion from '@models/suggestion';
 
 export const convertObjectsIdsToStrings = (objectsIds = []) => objectsIds.map(objectId => objectId.toString());
 
@@ -47,6 +48,16 @@ export const singleClubDelete = async (userPerforming, clubId) => {
 
   const clubToBeRemovedOriginal = _cloneDeep(clubToBeRemoved);
   await clubToBeRemoved.remove();
+
+  await Suggestion.updateMany(
+    {
+      original: clubId,
+    },
+    {
+      original: null,
+      type: 'new',
+    },
+  );
 
   const activity = new Activity({
     user: userPerforming,

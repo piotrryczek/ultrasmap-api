@@ -93,7 +93,7 @@ class MockData {
         'createBackup',
         'restoreBackup',
         'getBackup',
-        'getActivitiy',
+        'getActivity',
       ],
     };
 
@@ -361,30 +361,29 @@ class MockData {
       starStarachowice,
     ] = this.clubs;
 
-    // const newSuggestionForLechPoznan = new Suggestion({
-    //   type: 'new',
-    //   status: 'pending',
-    //   original: null,
-    //   data: {
-    //     name: 'Lech Poznań',
-    //     logo: 'lech.png',
-    //     tier: 1,
-    //     location: {
-    //       type: 'Point',
-    //       coordinates: [5, 5],
-    //     },
-    //     friendships: [],
-    //     friendshipsToCreate: ['Arka Gdynia', 'KSZO Ostrowiec Świętokrzyski', 'ŁKS Łódź', 'Cracovia Kraków'],
-    //     agreements: [],
-    //     agreementsToCreate: [],
-    //     positives: [],
-    //     positivesToCreate: ['Zagłębie Lubin', 'Górnik Zabrze'],
-    //   },
-    // });
+    const newSuggestionForLechPoznan = new Suggestion({
+      type: 'new',
+      original: null,
+      data: {
+        name: 'Lech Poznań',
+        logo: 'lech.png',
+        tier: 1,
+        location: {
+          type: 'Point',
+          coordinates: [5, 5],
+        },
+        friendships: [legiaWarszawa],
+        friendshipsToCreate: ['Arka Gdynia', 'KSZO Ostrowiec Świętokrzyski', 'ŁKS Łódź', 'Cracovia Kraków'],
+        agreements: [pogonSzczecin],
+        agreementsToCreate: [],
+        positives: [],
+        positivesToCreate: ['Zagłębie Lubin', 'Górnik Zabrze'],
+        satelliteOf: wislaKrakow,
+      },
+    });
 
     const editSuggestionForLegiaWarszawa = new Suggestion({
       type: 'edit',
-      status: 'pending',
       original: legiaWarszawa,
       data: {
         name: 'Legia Warszawa modified',
@@ -407,9 +406,84 @@ class MockData {
       },
     });
 
+    const editSuggestionForStarStarachowice = new Suggestion({
+      type: 'edit',
+      original: starStarachowice,
+      data: {
+        name: 'Star Starachowice modified',
+        logo: 'star.png',
+        tier: 1,
+        location: {
+          type: 'Point',
+          coordinates: [5, 5],
+        },
+        friendshipsToCreate: [],
+        friendships: [granatSkarzysko],
+        positivesToCreate: [],
+        positives: [],
+        agreementsToCreate: [],
+        agreements: [],
+        satellites: [],
+        satellitesToCreate: [],
+        satelliteOfToCreate: null,
+        satelliteOf: radomiakRadom,
+      },
+    });
+
+    const editSuggestionForStarStarachowice2 = new Suggestion({
+      type: 'edit',
+      original: starStarachowice,
+      data: {
+        name: 'Star Starachowice modified',
+        logo: 'star.png',
+        tier: 1,
+        location: {
+          type: 'Point',
+          coordinates: [5, 5],
+        },
+        friendshipsToCreate: [],
+        friendships: [granatSkarzysko],
+        positivesToCreate: [],
+        positives: [],
+        agreementsToCreate: [],
+        agreements: [],
+        satellites: [],
+        satellitesToCreate: [],
+        satelliteOfToCreate: null,
+        satelliteOf: widzewLodz,
+      },
+    });
+
+    const editSuggestionForGranatSkarzysko = new Suggestion({
+      type: 'edit',
+      original: granatSkarzysko,
+      data: {
+        name: 'Granat Skarżysko Kamienna',
+        logo: 'granat.png',
+        tier: 1,
+        location: {
+          type: 'Point',
+          coordinates: [5, 5],
+        },
+        friendshipsToCreate: ['Korona Kielce'],
+        friendships: [starStarachowice, widzewLodz],
+        positivesToCreate: [],
+        positives: [],
+        agreementsToCreate: [],
+        agreements: [],
+        satellites: [zaglebieSosnowiec],
+        satellitesToCreate: ['Proch Pionki'],
+        satelliteOfToCreate: 'Motor Lublin',
+        satelliteOf: null,
+      },
+    });
+
     await Promise.all([
-      // newSuggestionForLechPoznan.save(),
+      editSuggestionForStarStarachowice2.save(),
+      editSuggestionForGranatSkarzysko.save(),
+      newSuggestionForLechPoznan.save(),
       editSuggestionForLegiaWarszawa.save(),
+      editSuggestionForStarStarachowice.save(),
     ]);
   }
 }

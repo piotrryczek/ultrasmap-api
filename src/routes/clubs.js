@@ -16,6 +16,12 @@ router.post(
   upload.single('newLogo'),
   ClubsController.add,
 );
+router.post(
+  '/byNames',
+  retrieveUser,
+  hasCredential('updateClub'),
+  ClubsController.addByNames,
+);
 router.put(
   '/:clubId',
   retrieveUser,

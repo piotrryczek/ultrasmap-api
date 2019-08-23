@@ -5,6 +5,7 @@ const { Schema } = mongoose;
 const fullObjectData = {
   name: String,
   logo: String,
+  tier: Number,
   location: {
     type: {
       type: String,
@@ -45,11 +46,6 @@ const SuggestionSchema = new Schema({
   type: {
     type: String,
     enum: ['new', 'edit'],
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ['pending', 'applied', 'rejected'],
     required: true,
   },
   comments: [{

@@ -1,6 +1,6 @@
 import _cloneDeep from 'lodash/cloneDeep';
 
-import { suggestionStatuses, PER_PAGE } from '@config/config';
+import { PER_PAGE } from '@config/config';
 import Suggestion from '@models/suggestion';
 import Activity from '@models/activity';
 
@@ -13,12 +13,9 @@ class SuggestionsController {
     const {
       page = 1,
       type,
-      status = suggestionStatuses.pending,
     } = query;
 
-    const criteria = {
-      status,
-    };
+    const criteria = {};
 
     if (type) {
       Object.assign(criteria, {
@@ -80,35 +77,6 @@ class SuggestionsController {
     };
   }
 
-  updateStatus = async (ctx) => {
-    const {
-      params: {
-        suggestionId,
-      },
-      request: {
-        body,
-      },
-    } = ctx;
-
-    const { status } = body;
-
-    await Suggestion.findByIdAndUpdate(
-      suggestionId,
-      {
-        $set: {
-          status,
-        },
-      },
-      {
-        new: true,
-      },
-    );
-
-    ctx.body = {
-      success: true,
-    };
-  }
-
   add = async (ctx) => {
     const { body } = ctx.request;
 
@@ -123,7 +91,6 @@ class SuggestionsController {
 
     const newSuggestion = new Suggestion({
       type,
-      status: suggestionStatuses.pending,
       original: clubId,
       data,
       comments,
@@ -149,16 +116,35 @@ class SuggestionsController {
     const suggestionToBeRemovedOriginal = _cloneDeep(suggestionToBeRemoved);
     await suggestionToBeRemoved.remove();
 
-    const activity = new Activity({
-      user,
-      originalObject: null,
-      objectType: 'suggestion',
-      actionType: 'remove',
-      before: suggestionToBeRemovedOriginal,
-      after: null,
-    });
+    // const activity = new Activity({
+    //   user,
+    //   originalObject: null,
+    //   objectType: 'suggestion',
+    //   actionType: 'remove',
+    //   before: suggestionToBeRemovedOriginal,
+    //   after: null,
+    // });
 
-    await activity.save();
+    // await activity.save();
+
+    ctx.body = {
+      success: true,
+    };
+  }
+
+  bulkRemove = async (ctx) => {
+    const {
+      user,
+      request: {
+        body: {
+          ids,
+        },
+      },
+    } = ctx;
+
+    await Suggestion.deleteMany({
+      _id: { $in: ids },
+    });
 
     ctx.body = {
       success: true,

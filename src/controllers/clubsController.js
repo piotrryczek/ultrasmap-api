@@ -5,6 +5,7 @@ import _pull from 'lodash/pull';
 
 import {
   PER_PAGE,
+  DEFAULT_COORDINATES,
 } from '@config/config';
 import {
   getRelationsToEdit,
@@ -474,6 +475,34 @@ class ClubsController {
     await activity.save();
 
     ctx.body = {
+      success: true,
+    };
+  }
+
+  addByNames = async (ctx) => {
+    const {
+      user,
+      request: {
+        body,
+      },
+    } = ctx;
+
+    const { clubNames } = body;
+
+    const clubsToAdd = clubNames.map(clubName => ({
+      name: clubName,
+      location: {
+        type: 'Point',
+        coordinates: DEFAULT_COORDINATES,
+      },
+    }));
+
+    const addedClubs = await Club.insertMany(clubsToAdd);
+
+    // TODO: Activity
+
+    ctx.body = {
+      data: addedClubs,
       success: true,
     };
   }
