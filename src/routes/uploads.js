@@ -14,4 +14,11 @@ router.post(
   UploadsController.upload,
 );
 
+router.post(
+  '/regenerateImages',
+  retrieveUser,
+  hasCredential('regenerateImages'),
+  UploadsController.regenerateImageSizes,
+);
+
 export default router;

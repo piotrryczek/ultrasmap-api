@@ -450,7 +450,7 @@ class ClubsController {
       );
     }
 
-    if (prevSatelliteOf && prevSatelliteOf !== satelliteOf) { // removing
+    if (prevSatelliteOf && prevSatelliteOf.toString() !== satelliteOf) { // removing
       await Club.updateOne(
         {
           _id: prevSatelliteOf,
@@ -489,7 +489,28 @@ class ClubsController {
 
     const { clubNames } = body;
 
-    const clubsToAdd = clubNames.map(clubName => ({
+    const foundClubs = await Club.find({
+      name: { $in: clubNames },
+    });
+
+    const {
+      existingClubs,
+      clubNamesToAdd,
+    } = clubNames.reduce((acc, clubName) => {
+      const maybeFound = foundClubs.find(foundClub => foundClub.name === clubName);
+      if (maybeFound) {
+        acc.existingClubs.push(maybeFound);
+      } else {
+        acc.clubNamesToAdd.push(clubName);
+      }
+
+      return acc;
+    }, {
+      existingClubs: [],
+      clubNamesToAdd: [],
+    });
+
+    const clubsToAdd = clubNamesToAdd.map(clubName => ({
       name: clubName,
       location: {
         type: 'Point',
@@ -502,7 +523,7 @@ class ClubsController {
     // TODO: Activity
 
     ctx.body = {
-      data: addedClubs,
+      data: [...addedClubs, ...existingClubs],
       success: true,
     };
   }

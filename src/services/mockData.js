@@ -3,6 +3,8 @@
  * - suggestion
  */
 
+// ZACZYNAMY OD TEGO DLACZEGO TRACIMY SATELITE
+
 import md5 from 'md5';
 import _isEmpty from 'lodash/isEmpty';
 
@@ -94,6 +96,7 @@ class MockData {
         'restoreBackup',
         'getBackup',
         'getActivity',
+        'regenerateImages',
       ],
     };
 
@@ -180,101 +183,101 @@ class MockData {
   insertClubs = async () => {
     const legiaWarszawa = new Club({
       name: 'Legia Warszawa',
-      logo: 'legia.png',
+      logo: 'legia_warszawa.png',
       tier: 1,
       location: {
         type: 'Point',
-        coordinates: [5, 5],
+        coordinates: [52.2240298487845, 21.0043334960938],
       },
     });
 
     const olimpiaElblag = new Club({
       name: 'Olimpia Elbląg',
-      logo: 'olimpia.png',
+      logo: 'olimpia_elblag.png',
       tier: 1,
       location: {
         type: 'Point',
-        coordinates: [5, 5],
+        coordinates: [54.1507888138239, 19.4085693359375],
       },
     });
 
     const zaglebieSosnowiec = new Club({
       name: 'Zagłębie Sosnowiec',
-      logo: 'zaglebie.png',
+      logo: 'zaglebie_sosnowiec.png',
       tier: 1,
       location: {
         type: 'Point',
-        coordinates: [5, 5],
+        coordinates: [50.2871622295774, 19.1201782226563],
       },
     });
 
     const radomiakRadom = new Club({
       name: 'Radomiak Radom',
-      logo: 'radomiak.png',
+      logo: 'radomiak_radom.png',
       tier: 1,
       location: {
         type: 'Point',
-        coordinates: [5, 5],
+        coordinates: [51.4107869228815, 21.14990234375],
       },
     });
 
     const pogonSzczecin = new Club({
       name: 'Pogoń Szczecin',
-      logo: 'pogon.png',
+      logo: 'pogon_szczecin.png',
       tier: 1,
       location: {
         type: 'Point',
-        coordinates: [5, 5],
+        coordinates: [53.4238704988048, 14.5416259765625],
       },
     });
 
     const widzewLodz = new Club({
       name: 'Widzew Łódź',
-      logo: 'widzew.png',
+      logo: 'widzew_lodz.jpg',
       tier: 1,
       location: {
         type: 'Point',
-        coordinates: [5, 5],
+        coordinates: [51.7619065082185, 19.5067596435547],
       },
     });
 
     const ruchChorzow = new Club({
       name: 'Ruch Chorzów',
-      logo: 'ruch.png',
+      logo: 'ruch_chorzow.jpg',
       tier: 1,
       location: {
         type: 'Point',
-        coordinates: [5, 5],
+        coordinates: [50.3011993720648, 18.9553833007813],
       },
     });
 
     const wislaKrakow = new Club({
       name: 'Wisła Kraków',
-      logo: 'wisla.png',
+      logo: 'wisla_krakow.png',
       tier: 1,
       location: {
         type: 'Point',
-        coordinates: [5, 5],
+        coordinates: [50.0478968281156, 19.94140625],
       },
     });
 
     const granatSkarzysko = new Club({
       name: 'Granat Skarżysko Kamienna',
-      logo: 'granat.png',
+      logo: 'granat_skarzysko_kamienna.png',
       tier: 1,
       location: {
         type: 'Point',
-        coordinates: [5, 5],
+        coordinates: [51.1048316572674, 20.8518981933594],
       },
     });
 
     const starStarachowice = new Club({
       name: 'Star Starachowice',
-      logo: 'star.png',
+      logo: 'star_starachowice.png',
       tier: 1,
       location: {
         type: 'Point',
-        coordinates: [5, 5],
+        coordinates: [51.0323428818477, 21.0743713378906],
       },
     });
 
@@ -302,6 +305,10 @@ class MockData {
 
     Object.assign(zaglebieSosnowiec, {
       friendships: [legiaWarszawa, olimpiaElblag],
+    });
+
+    Object.assign(radomiakRadom, {
+      friendships: [legiaWarszawa],
     });
 
     Object.assign(pogonSzczecin, {
@@ -355,7 +362,7 @@ class MockData {
       radomiakRadom,
       pogonSzczecin,
       widzewLodz,
-      ruchChorzow,
+      // ruchChorzow,
       wislaKrakow,
       granatSkarzysko,
       starStarachowice,
@@ -377,7 +384,7 @@ class MockData {
         agreements: [pogonSzczecin],
         agreementsToCreate: [],
         positives: [],
-        positivesToCreate: ['Zagłębie Lubin', 'Górnik Zabrze'],
+        positivesToCreate: ['Zagłębie Lubin', 'Górnik Zabrze', 'Wisła Kraków'],
         satelliteOf: wislaKrakow,
       },
     });
