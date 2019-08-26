@@ -49,13 +49,7 @@ const SuggestionSchema = new Schema({
     required: true,
   },
   comments: [{
-    author: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    text: {
-      type: String,
-    },
+    type: String,
   }],
   original: {
     type: Schema.Types.ObjectId,

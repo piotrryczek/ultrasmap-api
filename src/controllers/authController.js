@@ -9,7 +9,7 @@ class AuthController {
   register = async (ctx) => {
     const { body } = ctx.request;
 
-    const { name, email, password } = body;
+    const { email, password } = body;
 
     const isUserWithEmail = await User.findOne({ email });
 
@@ -18,7 +18,6 @@ class AuthController {
     const hashedPassword = md5(password);
 
     await User.create({
-      name,
       email,
       password: hashedPassword,
     });

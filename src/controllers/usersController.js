@@ -38,7 +38,7 @@ class UsersController {
         skip: (page - 1) * PER_PAGE,
         limit: PER_PAGE,
       },
-    ).populate('role', 'name');
+    ).populate('role');
 
     const allCount = await User.countDocuments(parsedSearch);
 
@@ -52,7 +52,6 @@ class UsersController {
     const { user, request } = ctx;
     const { body } = request;
     const {
-      name,
       email,
       password,
       role,
@@ -63,7 +62,6 @@ class UsersController {
     if (isUserWithEmail) throw new ApiError(errorCodes.UserWithEmailExists);
 
     const newUser = new User({
-      name,
       email,
       password: md5(password),
       role,
@@ -94,7 +92,6 @@ class UsersController {
     const { userId } = params;
 
     const {
-      name,
       email,
       role,
       password = null,
@@ -111,7 +108,6 @@ class UsersController {
     const userToBeUpdatedOriginal = _cloneDeep(userToBeUpdated);
 
     Object.assign(userToBeUpdated, {
-      name,
       email,
       role,
     });

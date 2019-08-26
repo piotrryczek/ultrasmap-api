@@ -6,6 +6,7 @@ import Activity from '@models/activity';
 
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
+import ImageUpload from '@services/imageUpload';
 
 class SuggestionsController {
   getPaginated = async (ctx) => {
@@ -32,6 +33,7 @@ class SuggestionsController {
           limit: PER_PAGE,
         },
       )
+      .sort({ createdAt: 'descending' })
       .populate('original')
       .populate({ 
         path: 'original',
@@ -78,7 +80,12 @@ class SuggestionsController {
   }
 
   add = async (ctx) => {
-    const { body } = ctx.request;
+    const {
+      req: {
+        file,
+        body,
+      },
+    } = ctx;
 
     const {
       type,
@@ -87,12 +94,29 @@ class SuggestionsController {
       initialComment = null,
     } = body;
 
+    const parsedData = JSON.parse(data);
+
+    Object.assign(parsedData, {
+      location: {
+        type: 'Point',
+        coordinates: parsedData.coordinates,
+      },
+    });
+
+    if (file) {
+      const logoUrl = await ImageUpload.upload(file);
+
+      Object.assign(parsedData, {
+        logo: logoUrl,
+      });
+    }
+
     const comments = initialComment ? [initialComment] : [];
 
     const newSuggestion = new Suggestion({
       type,
       original: clubId,
-      data,
+      data: parsedData,
       comments,
     });
 

@@ -2,6 +2,7 @@ import Router from 'koa-router';
 
 import SuggestionsController from '@controllers/suggestionsController';
 import { retrieveUser, hasCredential } from '@utilities/middlewares';
+import upload from '@utilities/multer';
 
 const router = new Router({ prefix: '/suggestions' });
 
@@ -16,6 +17,7 @@ router.post(
   '/',
   retrieveUser,
   hasCredential('addSuggestion'),
+  upload.single('newLogo'),
   SuggestionsController.add,
 );
 router.patch(
