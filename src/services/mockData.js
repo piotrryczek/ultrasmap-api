@@ -123,7 +123,14 @@ class MockData {
       ],
     };
 
-    const roles = [adminRole, moderatorRole, userRole];
+    const userDisabledRole = {
+      name: 'userDisabled',
+      credentials: [
+        'getClub',
+      ],
+    };
+
+    const roles = [adminRole, moderatorRole, userRole, userDisabledRole];
 
     const insertedRoles = await Role.insertMany(roles);
 
@@ -138,6 +145,7 @@ class MockData {
       email: 'admin@ultrasmap.pl',
       password: md5('admin12'),
       role: this.roles.admin,
+      verified: true,
     };
 
     const moderator = {
@@ -145,6 +153,7 @@ class MockData {
       email: 'moderator@ultrasmap.pl',
       password: md5('moderator12'),
       role: this.roles.moderator,
+      verified: true,
     };
 
     const user1 = {
@@ -152,6 +161,7 @@ class MockData {
       email: 'user1@ultrasmap.pl',
       password: md5('user12'),
       role: this.roles.user,
+      verified: true,
     };
 
     const user2 = {
@@ -159,6 +169,7 @@ class MockData {
       email: 'user2@ultrasmap.pl',
       password: md5('user12'),
       role: this.roles.user,
+      verified: true,
     };
 
     const user3 = {
@@ -166,6 +177,7 @@ class MockData {
       email: 'user3@ultrasmap.pl',
       password: md5('user12'),
       role: this.roles.user,
+      verified: true,
     };
 
     const user4 = {
@@ -173,11 +185,12 @@ class MockData {
       email: 'user4@ultrasmap.pl',
       password: md5('user12'),
       role: this.roles.user,
+      verified: true,
     };
 
     const users = [admin, moderator, user1, user2, user3, user4];
 
-    await User.insertMany(users);
+    this.users = await User.insertMany(users);
   }
 
   insertClubs = async () => {
@@ -387,6 +400,7 @@ class MockData {
         positivesToCreate: ['Zagłębie Lubin', 'Górnik Zabrze', 'Wisła Kraków'],
         satelliteOf: wislaKrakow,
       },
+      user: this.users[3],
     });
 
     const editSuggestionForLegiaWarszawa = new Suggestion({
@@ -411,6 +425,7 @@ class MockData {
         satelliteOfToCreate: null,
         satelliteOf: starStarachowice,
       },
+      user: this.users[4],
     });
 
     const editSuggestionForStarStarachowice = new Suggestion({
@@ -435,6 +450,7 @@ class MockData {
         satelliteOfToCreate: null,
         satelliteOf: radomiakRadom,
       },
+      user: this.users[3],
     });
 
     const editSuggestionForStarStarachowice2 = new Suggestion({
@@ -459,6 +475,7 @@ class MockData {
         satelliteOfToCreate: null,
         satelliteOf: widzewLodz,
       },
+      user: this.users[5],
     });
 
     const editSuggestionForGranatSkarzysko = new Suggestion({
@@ -483,6 +500,7 @@ class MockData {
         satelliteOfToCreate: 'Motor Lublin',
         satelliteOf: null,
       },
+      user: this.users[4],
     });
 
     await Promise.all([

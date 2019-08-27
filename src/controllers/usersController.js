@@ -22,6 +22,18 @@ class UsersController {
     };
   }
 
+  emailExists = async (ctx) => {
+    const { query: { email } } = ctx;
+
+    const maybeFoundUser = await User.findOne({
+      email,
+    });
+
+    ctx.body = {
+      data: !!maybeFoundUser,
+    };
+  }
+
   getPaginated = async (ctx) => {
     const { query } = ctx;
     const {

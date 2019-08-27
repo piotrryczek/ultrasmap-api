@@ -34,6 +34,7 @@
     "mongoose": "^5.4.19",
     "mongoose-auto-increment": "^5.0.1",
     "node-cron": "^2.0.3",
+    "nodemailer": "^6.3.0",
     "nodemon": "^1.18.10",
     "object.fromentries": "^2.0.0",
     "qs": "^6.8.0",

@@ -34,6 +34,7 @@ class SuggestionsController {
         },
       )
       .sort({ createdAt: 'descending' })
+      .populate('user')
       .populate('original')
       .populate({ 
         path: 'original',
@@ -81,6 +82,7 @@ class SuggestionsController {
 
   add = async (ctx) => {
     const {
+      user,
       req: {
         file,
         body,
@@ -118,6 +120,7 @@ class SuggestionsController {
       original: clubId,
       data: parsedData,
       comments,
+      user,
     });
 
     await newSuggestion.validate();

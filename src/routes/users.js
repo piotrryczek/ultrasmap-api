@@ -7,21 +7,30 @@ import { retrieveUser, hasCredential, isNotLogged } from '@utilities/middlewares
 const router = new Router({ prefix: '/users' });
 
 router.get(
-  '/:userId',
-  retrieveUser,
-  hasCredential('getUser'),
-  UsersController.get,
-);
-router.get(
   '/',
   retrieveUser,
   hasCredential('getUser'),
   UsersController.getPaginated,
 );
+router.get(
+  '/emailExists',
+  UsersController.emailExists,
+);
+router.get(
+  '/:userId',
+  retrieveUser,
+  hasCredential('getUser'),
+  UsersController.get,
+);
 router.post(
   '/register',
   isNotLogged,
   AuthController.register,
+);
+router.patch(
+  '/verify',
+  isNotLogged,
+  AuthController.verify,
 );
 router.post(
   '/login',

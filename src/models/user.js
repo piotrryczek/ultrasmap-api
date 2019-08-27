@@ -19,6 +19,14 @@ const UserSchema = new Schema({
     ref: 'Role',
     required: true,
   },
+  verified: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  verificationCode: {
+    type: String,
+  },
 }, {
   timestamps: true,
   versionKey: false,

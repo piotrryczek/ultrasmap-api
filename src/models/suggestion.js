@@ -56,6 +56,10 @@ const SuggestionSchema = new Schema({
     ref: 'Club',
   },
   data: fullObjectData,
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+  },
 }, {
   timestamps: true,
   versionKey: false,

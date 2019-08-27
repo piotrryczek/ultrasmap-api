@@ -14,6 +14,11 @@ export default {
     type: 'LOGIN_FAILED',
     message: 'Authentication failed',
   },
+  UserNotVerified: {
+    status: 403,
+    type: 'USER_NOT_VERIFIED',
+    message: 'User has not been verified',
+  },
   UserWithEmailExists: {
     status: 409,
     type: 'USER_WITH_EMAIL_EXISTS',
