@@ -6,9 +6,9 @@ import '@models/role';
 import '@models/suggestion';
 import '@models/user';
 
-const dbName = process.env.DATABASE_NAME;
+const connectionUrl = process.env.MONGO_CONNECTION;
 
-mongoose.connect(`mongodb://localhost:27017/${dbName}`, {
+mongoose.connect(connectionUrl, {
   useNewUrlParser: true,
   useCreateIndex: true,
 });
