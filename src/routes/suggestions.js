@@ -12,13 +12,18 @@ router.get(
   hasCredential('getSuggestion'),
   SuggestionsController.getPaginated,
 );
-
 router.post(
   '/',
   retrieveUser,
   hasCredential('addSuggestion'),
   upload.single('newLogo'),
   SuggestionsController.add,
+);
+router.patch(
+  '/:suggestionId/status',
+  retrieveUser,
+  hasCredential('updateSuggestion'),
+  SuggestionsController.updateStatus,
 );
 router.patch(
   '/:suggestionId/addComment',

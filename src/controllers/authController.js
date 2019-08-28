@@ -34,7 +34,7 @@ class AuthController {
     await EmailSender.sendEmail({
       to: email,
       subject: 'UltrasMap: Potwierdź swój email',
-      html: `<a href="${process.env.APP_URL}/confirm?code=${verificationCode}">Kliknij ten link</a>`,
+      html: `<a href="${process.env.APP_URL}/confirm/code=${verificationCode}">Kliknij ten link</a>`,
     });
 
     ctx.body = {
@@ -56,11 +56,17 @@ class AuthController {
     if (!user) throw new ApiError(errorCodes.AuthenticationFailed);
     if (!user.verified) throw new ApiError(errorCodes.UserNotVerified);
 
-    const token = jwt.sign({
-      data: {
-        email,
+    const token = jwt.sign(
+      {
+        data: {
+          email,
+        },
       },
-    }, process.env.JWT_SECRET);
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '14d',
+      },
+    );
 
     const {
       role: {

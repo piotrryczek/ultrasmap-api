@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "babel-node src/server.js",
     "start-dev": "nodemon --exec babel-node src/server.js",
     "postinstall": "link-module-alias",
     "test": "jest --detectOpenHandles"
@@ -23,6 +24,8 @@
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-combine-routers": "^4.0.2",
+    "koa-compress": "^3.0.0",
+    "koa-helmet": "^5.1.0",
     "koa-mount": "^4.0.0",
     "koa-multer": "^1.0.2",
     "koa-router": "^7.4.0",

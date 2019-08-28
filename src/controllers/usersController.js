@@ -67,6 +67,7 @@ class UsersController {
       email,
       password,
       role,
+      verified,
     } = body;
 
     const isUserWithEmail = await User.findOne({ email });
@@ -77,6 +78,7 @@ class UsersController {
       email,
       password: md5(password),
       role,
+      verified,
     });
 
     await newUser.validate();
@@ -106,6 +108,7 @@ class UsersController {
     const {
       email,
       role,
+      verified,
       password = null,
     } = body;
 
@@ -122,6 +125,7 @@ class UsersController {
     Object.assign(userToBeUpdated, {
       email,
       role,
+      verified,
     });
 
     if (password) {

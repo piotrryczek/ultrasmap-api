@@ -27,6 +27,16 @@ const UserSchema = new Schema({
   verificationCode: {
     type: String,
   },
+  suggestionsDailyLimit: {
+    type: Number,
+    required: true,
+    default: 5,
+  },
+  suggestionsDailyLeft: {
+    type: Number,
+    required: true,
+    default: 5,
+  },
 }, {
   timestamps: true,
   versionKey: false,

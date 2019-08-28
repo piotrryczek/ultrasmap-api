@@ -3,6 +3,8 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 import serve from 'koa-static';
 import mount from 'koa-mount';
+import compress from 'koa-compress';
+import helmet from 'koa-helmet';
 
 import db from '@config/db';
 
@@ -15,6 +17,8 @@ db.on('error', () => {
 });
 
 const app = new Koa();
+app.use(compress());
+app.use(helmet());
 app.use(cors());
 app.use(bodyParser());
 

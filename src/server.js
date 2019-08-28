@@ -1,7 +1,5 @@
 /**
  * TODO:
- * - jwtToken timeout
- * - verification email
  * - reseting password
  * - removing files while deleting club
  */

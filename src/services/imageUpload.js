@@ -29,7 +29,7 @@ class ImageUpload {
 
         resolve();
       } catch (error) {
-        reject(error); // TODO
+        reject(error); // TODO: reject error
       }
     }));
 

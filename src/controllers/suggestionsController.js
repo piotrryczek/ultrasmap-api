@@ -4,6 +4,7 @@ import { PER_PAGE } from '@config/config';
 import Suggestion from '@models/suggestion';
 import Activity from '@models/activity';
 
+import EmailSender from '@services/emailSender';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
 import ImageUpload from '@services/imageUpload';
@@ -14,9 +15,12 @@ class SuggestionsController {
     const {
       page = 1,
       type,
+      status = 'pending',
     } = query;
 
-    const criteria = {};
+    const criteria = {
+      status,
+    };
 
     if (type) {
       Object.assign(criteria, {
@@ -131,6 +135,40 @@ class SuggestionsController {
     };
   }
 
+  updateStatus = async (ctx) => {
+    const {
+      request: {
+        body: {
+          status,
+        },
+      },
+      params: {
+        suggestionId,
+      },
+    } = ctx;
+
+    const suggestionToBeUpdated = await Suggestion.findById(suggestionId);
+
+    Object.assign(suggestionToBeUpdated, {
+      status,
+    });
+
+    await suggestionToBeUpdated.save();
+
+    const email = await suggestionToBeUpdated.getUserEmail();
+    const clubName = await suggestionToBeUpdated.getClubName();
+
+    EmailSender.sendEmail({ // TODO: Translation
+      to: email,
+      subject: 'Twoja sugestia została zaakceptowana',
+      html: `Sugestia dla ${clubName} została zaakceptowana. Dziękujemy!`,
+    });
+
+    ctx.body = {
+      success: true,
+    };
+  }
+
   remove = async (ctx) => {
     const {
       user,
@@ -169,9 +207,18 @@ class SuggestionsController {
       },
     } = ctx;
 
-    await Suggestion.deleteMany({
-      _id: { $in: ids },
-    });
+    const removePromises = ids.map(id => new Promise(async (resolve, reject) => {
+      try {
+        const suggestion = await Suggestion.findById(id); // Because of firing middleware
+        await suggestion.remove();
+
+        resolve();
+      } catch (error) {
+        reject(new ApiError(errorCodes.Internal, error));
+      }
+    }));
+
+    await Promise.all(removePromises);
 
     ctx.body = {
       success: true,

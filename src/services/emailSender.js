@@ -14,14 +14,26 @@ class EmailSender {
     });
   }
 
-  sendEmail = async ({ to, subject, html, attachments = {} }) => {
-    await this.transport.sendMail({
+  sendEmail = async ({
+    to,
+    subject,
+    html,
+    attachments = null,
+  }) => {
+    const emailObject = {
       from: EMAIL_FROM,
       to,
       subject,
       html,
-      attachments,
-    });
+    };
+
+    if (attachments) {
+      Object.assign(emailObject, {
+        attachments,
+      });
+    }
+
+    await this.transport.sendMail(emailObject);
   }
 }
 
