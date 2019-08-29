@@ -34,7 +34,7 @@ class AuthController {
     await EmailSender.sendEmail({
       to: email,
       subject: 'UltrasMap: Potwierdź swój email',
-      html: `<a href="${process.env.APP_URL}/confirm/code=${verificationCode}">Kliknij ten link</a>`,
+      html: `<a href="${process.env.APP_URL}/confirm/${verificationCode}">Kliknij ten link</a>`,
     });
 
     ctx.body = {

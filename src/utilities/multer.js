@@ -1,3 +1,3 @@
 import multer from 'koa-multer';
 
-export default multer({ dest: '/images' });
+export default multer({ dest: `${process.cwd()}/temp` });

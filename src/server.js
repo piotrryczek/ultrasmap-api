@@ -2,6 +2,7 @@
  * TODO:
  * - reseting password
  * - removing files while deleting club
+ * - removing suggestions from user while removing it
  */
 
 import '@config/env';

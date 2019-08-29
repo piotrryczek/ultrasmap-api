@@ -246,7 +246,7 @@ class MockData {
 
     const widzewLodz = new Club({
       name: 'Widzew Łódź',
-      logo: 'widzew_lodz.jpg',
+      logo: 'widzew_lodz.png',
       tier: 1,
       location: {
         type: 'Point',

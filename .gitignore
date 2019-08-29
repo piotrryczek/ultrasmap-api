@@ -1,5 +1,9 @@
 node_modules
 backups
 uploads
+temp
+dist
+logs
 .env
-.env.testing
+development.env
+production.env

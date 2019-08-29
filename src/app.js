@@ -6,14 +6,14 @@ import mount from 'koa-mount';
 import compress from 'koa-compress';
 import helmet from 'koa-helmet';
 
+import logger from '@services/logger';
 import db from '@config/db';
-
 import { errorHandler } from '@utilities/middlewares';
 
 import router from './routes';
 
-db.on('error', () => {
-  console.log('Mongoose connection error');
+db.on('error', (error) => {
+  logger.error(`Mongoose connection error: ${error}`);
 });
 
 const app = new Koa();
@@ -25,10 +25,10 @@ app.use(bodyParser());
 app.use(errorHandler);
 
 app.on('error', (error) => {
-  console.log(error);
+  logger.error(error);
 });
 
-app.use(mount('/images', serve('./uploads')));
+app.use(mount('/images', serve(`${process.cwd()}/uploads`)));
 app.use(router());
 
 
