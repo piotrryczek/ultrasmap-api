@@ -8,8 +8,6 @@ import '@models/user';
 
 const connectionUrl = process.env.MONGO_CONNECTION;
 
-console.log(connectionUrl);
-
 mongoose.connect(connectionUrl, {
   useNewUrlParser: true,
   useCreateIndex: true,
