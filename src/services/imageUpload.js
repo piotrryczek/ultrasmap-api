@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { v4 } from 'uuid';
-import sharp from 'sharp';
+import Jimp from 'jimp';
 
 import { imagesHeights } from '@config/config';
 
@@ -21,11 +21,11 @@ class ImageUpload {
       try {
         const resizePath = `uploads/h${height}/${finalFilename}`;
 
-        await sharp(finalPath)
-          .resize(null, height, {
-            fit: sharp.fit.contain,
-          })
-          .toFile(resizePath);
+        const jimpImage = await Jimp.read(finalPath);
+        await jimpImage
+          .resize(Jimp.AUTO, height)
+          .quality(100)
+          .write(resizePath);
 
         resolve();
       } catch (error) {
@@ -50,11 +50,11 @@ class ImageUpload {
         try {
           const finalPath = `${basePath}/h${height}/${image}`;
 
-          await sharp(imagePath)
-            .resize(null, height, {
-              fit: sharp.fit.contain,
-            })
-            .toFile(finalPath);
+          const jimpImage = await Jimp.read(imagePath);
+          await jimpImage
+            .resize(Jimp.AUTO, height)
+            .quality(100)
+            .write(finalPath);
 
           resolve();
         } catch (error) {

@@ -59,4 +59,9 @@ export default {
     type: 'INCORRECT_MOCK_PASSWORD',
     message: 'Incorrect mock password',
   },
+  mockDisabled: {
+    status: 403,
+    type: 'MOCK_DISABLED',
+    message: 'Mocking data is disabled',
+  },
 };

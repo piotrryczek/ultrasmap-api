@@ -77,6 +77,7 @@ export const checkMockPassword = async (ctx, next) => {
   const { request: { body } } = ctx;
   const { password } = body;
 
+  if (!process.env.MOCK_PASSWORD) throw new ApiError(errorCodes.mockDisabled);
   if (md5(password) !== process.env.MOCK_PASSWORD) throw new ApiError(errorCodes.incorrectMockPassword);
 
   await next();
