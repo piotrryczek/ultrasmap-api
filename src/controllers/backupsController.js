@@ -5,7 +5,6 @@
 
 import fs from 'fs';
 
-import EmailSender from '@services/emailSender';
 import Activity from '@models/activity';
 import Backup from '@services/backup';
 
@@ -41,16 +40,6 @@ class BackupsController {
   create = async (ctx) => {
     const { user } = ctx;
     const fileName = await Backup.create();
-
-    await EmailSender.sendEmail({
-      to: process.env.MAIN_EMAIL,
-      subject: 'UltrasMap: Backup',
-      html: 'Został utworzony nowy backup.',
-      attachments: [{
-        filename: fileName,
-        path: `backups/${fileName}`,
-      }],
-    });
 
     // const activity = new Activity({
     //   user,

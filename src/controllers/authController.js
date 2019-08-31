@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import md5 from 'md5';
 import { v4 } from 'uuid';
+import { __ } from 'i18n';
 
 import User from '@models/user';
 import Role from '@models/role';
@@ -12,7 +13,7 @@ class AuthController {
   register = async (ctx) => {
     const { body } = ctx.request;
 
-    const { email, password } = body;
+    const { email, password, language } = body;
 
     const isUserWithEmail = await User.findOne({ email });
 
@@ -29,12 +30,13 @@ class AuthController {
       password: hashedPassword,
       verificationCode,
       role: userRole,
+      chosenLanguage: language,
     });
 
     await EmailSender.sendEmail({
       to: email,
-      subject: 'UltrasMap: Potwierdź swój email',
-      html: `<a href="${process.env.APP_URL}/confirm/${verificationCode}">Kliknij ten link</a>`,
+      subject: __({ phrase: 'registerEmail.title', locale: language }),
+      html: `<a href="${process.env.APP_URL}/confirm/${verificationCode}">${__({ phrase: 'registerEmail.clickLink', locale: language })}</a>`,
     });
 
     ctx.body = {
@@ -44,7 +46,7 @@ class AuthController {
 
   login = async (ctx) => {
     const { body } = ctx.request;
-    const { email, password } = body;
+    const { email, password, adminPanel = false } = body;
 
     const hashedPassword = md5(password);
 
@@ -55,6 +57,11 @@ class AuthController {
 
     if (!user) throw new ApiError(errorCodes.AuthenticationFailed);
     if (!user.verified) throw new ApiError(errorCodes.UserNotVerified);
+
+    if (adminPanel) {
+      const { role: { credentials } } = user;
+      if (!credentials.includes('enterAdminPanel')) throw new ApiError(errorCodes.NotAuthorized);
+    }
 
     const token = jwt.sign(
       {
@@ -72,11 +79,13 @@ class AuthController {
       role: {
         credentials,
       },
+      chosenLanguage,
     } = user;
 
     ctx.body = {
       data: token,
       credentials,
+      language: chosenLanguage,
     };
   }
 

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { LANGUAGES, DEFAULT_LANGUAGE } from '@config/config';
 
 const { Schema } = mongoose;
 
@@ -36,6 +37,12 @@ const UserSchema = new Schema({
     type: Number,
     required: true,
     default: 5,
+  },
+  chosenLanguage: {
+    type: String,
+    enum: LANGUAGES,
+    required: true,
+    default: DEFAULT_LANGUAGE,
   },
 }, {
   timestamps: true,

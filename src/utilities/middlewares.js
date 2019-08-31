@@ -82,3 +82,29 @@ export const checkMockPassword = async (ctx, next) => {
 
   await next();
 };
+
+export const corsHandler = (ctx) => {
+  const acceptedOrigins = [process.env.APP_URL, process.env.ADMIN_URL];
+
+  const { accept: { headers: { origin } } } = ctx;
+  if (!acceptedOrigins.includes(origin)) {
+    return ctx.throw(`${origin} CORS error`);
+  }
+
+  return origin;
+}
+
+export const isItself = async (ctx, next) => {
+  const {
+    user: {
+      _id: currentUserId,
+    },
+    params: {
+      userId: toChangeUserId,
+    },
+  } = ctx;
+
+  if (currentUserId.toString() !== toChangeUserId) throw new ApiError(errorCodes.UserNotItself);
+
+  await next();
+}

@@ -73,14 +73,14 @@ const SuggestionSchema = new Schema({
   versionKey: false,
 });
 
-SuggestionSchema.method('getUserEmail', async function () {
+SuggestionSchema.method('getUser', async function () {
   const { user: userId } = this;
 
   const User = this.model('User');
 
-  const { email } = await User.findById(userId);
+  const user = await User.findById(userId);
 
-  return email;
+  return user;
 });
 
 SuggestionSchema.method('getClubName', async function () {
@@ -101,13 +101,13 @@ SuggestionSchema.method('getClubName', async function () {
 });
 
 SuggestionSchema.post('remove', async (document, next) => {
-  const email = await document.getUserEmail();
+  const { email, chosenLanguage } = await document.getUser();
   const clubName = await document.getClubName();
 
   EmailSender.sendEmail({
     to: email,
-    subject: 'Twoja sugestia została odrzucona',
-    html: `Sugestia dla ${clubName} została odrzucona.`,
+    subject: __({ phrase: 'suggestionRejectedEmail.title', locale: chosenLanguage }),
+    html: __({ phrase: 'suggestionRejectedEmail.content', locale: chosenLanguage }, clubName),
   });
 
   next();

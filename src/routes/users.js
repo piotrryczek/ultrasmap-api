@@ -60,5 +60,10 @@ router.delete(
   hasCredential('updateUser'),
   UsersController.remove,
 );
+router.patch(
+  '/updateLanguage',
+  retrieveUser,
+  UsersController.updateLanguage,
+);
 
 export default router;

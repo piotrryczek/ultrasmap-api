@@ -1,13 +1,14 @@
-import _cloneDeep from 'lodash/cloneDeep';
+// import _cloneDeep from 'lodash/cloneDeep';
 
 import { PER_PAGE } from '@config/config';
 import Suggestion from '@models/suggestion';
-import Activity from '@models/activity';
+// import Activity from '@models/activity';
 
 import EmailSender from '@services/emailSender';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
 import ImageUpload from '@services/imageUpload';
+import { __ } from 'i18n';
 
 class SuggestionsController {
   getPaginated = async (ctx) => {
@@ -40,31 +41,31 @@ class SuggestionsController {
       .sort({ createdAt: 'descending' })
       .populate('user')
       .populate('original')
-      .populate({ 
+      .populate({
         path: 'original',
         populate: {
           path: 'friendships',
         },
       })
-      .populate({ 
+      .populate({
         path: 'original',
         populate: {
           path: 'agreements',
         },
       })
-      .populate({ 
+      .populate({
         path: 'original',
         populate: {
           path: 'positives',
         },
       })
-      .populate({ 
+      .populate({
         path: 'original',
         populate: {
           path: 'satellites',
         },
       })
-      .populate({ 
+      .populate({
         path: 'original',
         populate: {
           path: 'satelliteOf',
@@ -147,7 +148,7 @@ class SuggestionsController {
       },
     } = ctx;
 
-    const suggestionToBeUpdated = await Suggestion.findById(suggestionId);
+    const suggestionToBeUpdated = await Suggestion.findById(suggestionId).populate('user');
 
     Object.assign(suggestionToBeUpdated, {
       status,
@@ -155,13 +156,18 @@ class SuggestionsController {
 
     await suggestionToBeUpdated.save();
 
-    const email = await suggestionToBeUpdated.getUserEmail();
+    const {
+      user: {
+        email,
+        chosenLanguage,
+      },
+    } = suggestionToBeUpdated;
     const clubName = await suggestionToBeUpdated.getClubName();
 
-    EmailSender.sendEmail({ // TODO: Translation
+    EmailSender.sendEmail({
       to: email,
-      subject: 'Twoja sugestia została zaakceptowana',
-      html: `Sugestia dla ${clubName} została zaakceptowana. Dziękujemy!`,
+      subject: __({ phrase: 'suggestionAppliedEmail.title', locale: chosenLanguage }),
+      html: __({ phrase: 'suggestionAppliedEmail.content', locale: chosenLanguage }, clubName),
     });
 
     ctx.body = {
@@ -171,14 +177,14 @@ class SuggestionsController {
 
   remove = async (ctx) => {
     const {
-      user,
+      // user,
       params: {
         suggestionId,
       },
     } = ctx;
 
     const suggestionToBeRemoved = await Suggestion.findById(suggestionId);
-    const suggestionToBeRemovedOriginal = _cloneDeep(suggestionToBeRemoved);
+    // const suggestionToBeRemovedOriginal = _cloneDeep(suggestionToBeRemoved);
     await suggestionToBeRemoved.remove();
 
     // const activity = new Activity({
@@ -199,7 +205,7 @@ class SuggestionsController {
 
   bulkRemove = async (ctx) => {
     const {
-      user,
+      // user,
       request: {
         body: {
           ids,

@@ -6,6 +6,7 @@
 import fs from 'fs';
 import moment from 'moment';
 
+import EmailSender from '@services/emailSender';
 import Club from '@models/club';
 import User from '@models/user';
 import Role from '@models/role';
@@ -26,6 +27,16 @@ class Backup {
       const fileName = `${moment().format('YYYY-MM-DD HH-mm-ss')}.json`;
 
       await fs.promises.writeFile(`backups/${fileName}`, JSON.stringify(finalJson), 'utf8');
+
+      await EmailSender.sendEmail({
+        to: process.env.MAIN_EMAIL,
+        subject: 'UltrasMap: Backup',
+        html: 'Został utworzony nowy backup.',
+        attachments: [{
+          filename: fileName,
+          path: `backups/${fileName}`,
+        }],
+      });
 
       return fileName;
     } catch (error) {

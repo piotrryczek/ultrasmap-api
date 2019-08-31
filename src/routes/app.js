@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+import { __ } from 'i18n';
 
 const router = new Router({ prefix: '/app' });
 

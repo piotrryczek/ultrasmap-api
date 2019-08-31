@@ -64,4 +64,9 @@ export default {
     type: 'MOCK_DISABLED',
     message: 'Mocking data is disabled',
   },
+  UserNotItself: {
+    status: 403,
+    type: 'USER_NOT_ITSELF',
+    message: 'User which trying to be updated is not the same as user trying to perform action',
+  },
 };

@@ -1,8 +1,3 @@
-/**
- * TODO:
- * - cron every 12 hours
- */
-
 import cron from 'node-cron';
 
 import Backup from '@services/backup';

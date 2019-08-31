@@ -190,6 +190,27 @@ class UsersController {
       data: ids,
     };
   }
+
+  updateLanguage = async (ctx) => {
+    const {
+      user,
+      request: {
+        body: {
+          language,
+        },
+      },
+    } = ctx;
+
+    Object.assign(user, {
+      chosenLanguage: language,
+    });
+
+    await user.save();
+
+    ctx.body = {
+      success: true,
+    };
+  }
 }
 
 export default new UsersController();

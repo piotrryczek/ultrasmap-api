@@ -82,9 +82,11 @@ class MockData {
     const adminRole = {
       name: 'admin',
       credentials: [
+        'enterAdminPanel',
         'uploadFile',
         'getUser',
         'updateUser',
+        'updateUserSuggestionsLimit',
         'getRole',
         'getClub',
         'updateClub',
@@ -103,8 +105,11 @@ class MockData {
     const moderatorRole = {
       name: 'moderator',
       credentials: [
+        'enterAdminPanel',
         'uploadFile',
         'getClub',
+        'getUser',
+        'updateUserSuggestionsLimit',
         'updateClub',
         'getSuggestion',
         'addSuggestion',
@@ -246,7 +251,7 @@ class MockData {
 
     const widzewLodz = new Club({
       name: 'Widzew Łódź',
-      logo: 'widzew_lodz.png',
+      logo: 'widzew_lodz.jpg',
       tier: 1,
       location: {
         type: 'Point',

@@ -4,7 +4,6 @@ import Jimp from 'jimp';
 
 import { imagesHeights } from '@config/config';
 
-// TODO: File validation
 class ImageUpload {
   upload = async (file) => {
     const {
@@ -29,7 +28,7 @@ class ImageUpload {
 
         resolve();
       } catch (error) {
-        reject(error); // TODO: reject error
+        reject(error);
       }
     }));
 
@@ -38,7 +37,6 @@ class ImageUpload {
     return finalFilename;
   }
 
-  // TODO: error handling
   regenerateImages = async (images) => {
     const basePath = 'uploads';
 
@@ -58,7 +56,7 @@ class ImageUpload {
 
           resolve();
         } catch (error) {
-          reject(error); // TODO
+          reject(error);
         }
       }));
 
