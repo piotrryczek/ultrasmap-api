@@ -15,7 +15,7 @@ import router from './routes';
 
 i18n.configure({
   locales: ['pl', 'en'],
-  directory: `${__dirname}/locales`,
+  directory: `${process.cwd()}/locales`,
 });
 
 db.on('error', (error) => {

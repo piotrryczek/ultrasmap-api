@@ -16,8 +16,7 @@ const ActivitySchema = new Schema({
     enum: [
       'club',
       'user',
-      'backup',
-      'mock',
+      'suggestion',
     ],
     required: true,
   },
@@ -27,9 +26,7 @@ const ActivitySchema = new Schema({
       'add',
       'remove',
       'update',
-      'create', // backup
-      'restore', // backup
-      'insert', // mock
+      'apply', // suggestion
     ],
     required: true,
   },
@@ -37,9 +34,6 @@ const ActivitySchema = new Schema({
     type: Schema.Types.Mixed,
   },
   after: {
-    type: Schema.Types.Mixed,
-  },
-  metaData: {
     type: Schema.Types.Mixed,
   },
 }, {

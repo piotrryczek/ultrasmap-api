@@ -1,11 +1,5 @@
-/**
- * TODO:
- * - activities
- */
-
 import fs from 'fs';
 
-import Activity from '@models/activity';
 import Backup from '@services/backup';
 
 class BackupsController {
@@ -38,22 +32,7 @@ class BackupsController {
   }
 
   create = async (ctx) => {
-    const { user } = ctx;
     const fileName = await Backup.create();
-
-    // const activity = new Activity({
-    //   user,
-    //   originalObject: null,
-    //   objectType: 'backup',
-    //   actionType: 'create',
-    //   before: null,
-    //   after: null,
-    //   metaData: {
-    //     fileName,
-    //   },
-    // });
-
-    // await activity.save();
 
     ctx.body = {
       data: fileName,
@@ -61,7 +40,7 @@ class BackupsController {
   };
 
   restore = async (ctx) => {
-    const { request, user } = ctx;
+    const { request } = ctx;
     const {
       body: {
         fileName,
@@ -69,20 +48,6 @@ class BackupsController {
     } = request;
 
     await Backup.restore(fileName);
-
-    // const activity = new Activity({
-    //   user,
-    //   originalObject: null,
-    //   objectType: 'backup',
-    //   actionType: 'restore',
-    //   before: null,
-    //   after: null,
-    //   metaData: {
-    //     fileName,
-    //   },
-    // });
-
-    // await activity.save();
 
     ctx.body = {
       success: true,

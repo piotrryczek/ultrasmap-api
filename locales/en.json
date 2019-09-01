@@ -1,3 +1,10 @@
 {
-	"test": "test"
+	"register.email.title": "FanaticsMap: Confirm your email",
+	"register.email.clickLink": "Click this link",
+	"suggestionAppliedEmail.title": "Your suggestion has been applied",
+	"suggestionAppliedEmail.content": "Your suggestion for %s has been applied. Thank you!",
+	"suggestionRejectedEmail.title": "Your suggestion has been rejected",
+	"suggestionRejectedEmail.content": "Your suggestion for %s has been rejected. Probably it did not meet our standards but moderator's mistake was also possible. It could also duplicate other suggestion. Thank you and we encourage you to further support our project!",
+	"userDisabledEmail.title": "You have been muted", 
+	"userDisabledEmail.content": "Moderator decided to revoke your ability to add suggestions. All your suggestion were rejected."
 }

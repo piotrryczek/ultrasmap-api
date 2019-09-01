@@ -1,1 +1,10 @@
-{}
+{
+	"registerEmail.title": "FanaticsMap: Potwierdź swój email",
+	"registerEmail.clickLink": "Kliknij ten link",
+	"suggestionAppliedEmail.title": "Twoja sugestia została zaakceptowana",
+  "suggestionAppliedEmail.content": "Twoja sugestia dla %s została zaakceptowana, dziękujemy!",
+  "suggestionRejectedEmail.title": "Twoja sugestia została odrzucona",
+	"suggestionRejectedEmail.content": "Twoja sugestia dla %s została odrzucona. Najprawdopodobniej nie spełniała ona naszych standardów, ale jest też możliwy błąd moderatora bądź sugestia dublowała się z inną podobną. Dziękujemy za wkład i zachęcamy do dalszego wspierania projektu!",
+	"userDisabledEmail.title": "Zostałeś wyciszony", 
+	"userDisabledEmail.content": "Moderator zdecydował o odebraniu Tobie możliwości dodawania sugestii. Wszystkie Twoje sugestie zostały odrzucone."
+}

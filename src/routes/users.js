@@ -17,6 +17,12 @@ router.get(
   UsersController.emailExists,
 );
 router.get(
+  '/adminsAndModerators',
+  retrieveUser,
+  hasCredential('getUser'),
+  UsersController.getAdminAndModerators,
+);
+router.get(
   '/:userId',
   retrieveUser,
   hasCredential('getUser'),

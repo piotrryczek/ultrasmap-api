@@ -1,8 +1,3 @@
-/**
- * @TODO:
- * - send email
- */
-
 import fs from 'fs';
 import moment from 'moment';
 
@@ -10,6 +5,9 @@ import EmailSender from '@services/emailSender';
 import Club from '@models/club';
 import User from '@models/user';
 import Role from '@models/role';
+
+import ApiError from '@utilities/apiError';
+import errorCodes from '@config/errorCodes';
 
 class Backup {
   create = async () => {
@@ -30,7 +28,7 @@ class Backup {
 
       await EmailSender.sendEmail({
         to: process.env.MAIN_EMAIL,
-        subject: 'UltrasMap: Backup',
+        subject: `UltrasMap: Backup (${process.env.ADMIN_URL})`,
         html: 'Został utworzony nowy backup.',
         attachments: [{
           filename: fileName,
@@ -40,7 +38,7 @@ class Backup {
 
       return fileName;
     } catch (error) {
-      console.log(error);
+      throw new ApiError(errorCodes.Internal, error);
     }
   };
 
@@ -59,7 +57,7 @@ class Backup {
       await Club.deleteMany({});
       await Club.insertMany(clubs);
     } catch (error) {
-      console.log(error);
+      throw new ApiError(errorCodes.Internal, error);
     }
   }
 }

@@ -8,7 +8,7 @@ const router = new Router({ prefix: '/activities' });
 router.get(
   '/',
   retrieveUser,
-  hasCredential('getActivities'),
+  hasCredential('getActivity'),
   ActivitiesController.getPaginated,
 );
 

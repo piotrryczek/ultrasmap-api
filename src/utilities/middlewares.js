@@ -84,7 +84,7 @@ export const checkMockPassword = async (ctx, next) => {
 };
 
 export const corsHandler = (ctx) => {
-  const acceptedOrigins = [process.env.APP_URL, process.env.ADMIN_URL];
+  const acceptedOrigins = [process.env.APP_URL, process.env.ADMIN_URL, 'http://localhost:3000', 'http://localhost:3001'];
 
   const { accept: { headers: { origin } } } = ctx;
   if (!acceptedOrigins.includes(origin)) {

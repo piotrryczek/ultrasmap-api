@@ -1,5 +1,6 @@
 /* eslint-disable func-names */
 import mongoose from 'mongoose';
+import { __ } from 'i18n';
 import EmailSender from '@services/emailSender';
 
 const { Schema } = mongoose;
@@ -101,14 +102,21 @@ SuggestionSchema.method('getClubName', async function () {
 });
 
 SuggestionSchema.post('remove', async (document, next) => {
-  const { email, chosenLanguage } = await document.getUser();
-  const clubName = await document.getClubName();
+  const user = await document.getUser();
 
-  EmailSender.sendEmail({
-    to: email,
-    subject: __({ phrase: 'suggestionRejectedEmail.title', locale: chosenLanguage }),
-    html: __({ phrase: 'suggestionRejectedEmail.content', locale: chosenLanguage }, clubName),
-  });
+  if (user) {
+    const { email, chosenLanguage } = user;
+
+    const clubName = await document.getClubName();
+
+    if (email) {
+      EmailSender.sendEmail({
+        to: email,
+        subject: __({ phrase: 'suggestionRejectedEmail.title', locale: chosenLanguage }),
+        html: __({ phrase: 'suggestionRejectedEmail.content', locale: chosenLanguage }, clubName),
+      });
+    }
+  }
 
   next();
 });

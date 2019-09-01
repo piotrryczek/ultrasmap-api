@@ -2,7 +2,7 @@ import md5 from 'md5';
 import _cloneDeep from 'lodash/cloneDeep';
 
 import { PER_PAGE } from '@config/config';
-import { parseSearchQuery, singleUserRemove } from '@utilities/helpers';
+import { parseSearchQuery, singleUserRemove, getAdminsAndModerators } from '@utilities/helpers';
 
 import User from '@models/user';
 import Activity from '@models/activity';
@@ -31,6 +31,14 @@ class UsersController {
 
     ctx.body = {
       data: !!maybeFoundUser,
+    };
+  }
+
+  getAdminAndModerators = async (ctx) => {
+    const users = await getAdminsAndModerators();
+
+    ctx.body = {
+      data: users,
     };
   }
 

@@ -1,14 +1,16 @@
-// import _cloneDeep from 'lodash/cloneDeep';
+/* eslint-disable no-underscore-dangle */
+import _cloneDeep from 'lodash/cloneDeep';
+import { __ } from 'i18n';
 
 import { PER_PAGE } from '@config/config';
 import Suggestion from '@models/suggestion';
-// import Activity from '@models/activity';
+import Activity from '@models/activity';
+import Role from '@models/role';
 
 import EmailSender from '@services/emailSender';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
 import ImageUpload from '@services/imageUpload';
-import { __ } from 'i18n';
 
 class SuggestionsController {
   getPaginated = async (ctx) => {
@@ -138,6 +140,7 @@ class SuggestionsController {
 
   updateStatus = async (ctx) => {
     const {
+      user,
       request: {
         body: {
           status,
@@ -149,6 +152,7 @@ class SuggestionsController {
     } = ctx;
 
     const suggestionToBeUpdated = await Suggestion.findById(suggestionId).populate('user');
+    const updatedSuggestionCopy = _cloneDeep(suggestionToBeUpdated);
 
     Object.assign(suggestionToBeUpdated, {
       status,
@@ -156,19 +160,32 @@ class SuggestionsController {
 
     await suggestionToBeUpdated.save();
 
-    const {
-      user: {
-        email,
-        chosenLanguage,
-      },
-    } = suggestionToBeUpdated;
-    const clubName = await suggestionToBeUpdated.getClubName();
+    if (status === 'applied') {
+      const {
+        user: {
+          email,
+          chosenLanguage,
+        },
+      } = suggestionToBeUpdated;
+      const clubName = await suggestionToBeUpdated.getClubName();
 
-    EmailSender.sendEmail({
-      to: email,
-      subject: __({ phrase: 'suggestionAppliedEmail.title', locale: chosenLanguage }),
-      html: __({ phrase: 'suggestionAppliedEmail.content', locale: chosenLanguage }, clubName),
-    });
+      const activity = new Activity({
+        user,
+        originalObject: null,
+        objectType: 'suggestion',
+        actionType: 'apply',
+        before: updatedSuggestionCopy,
+        after: null,
+      });
+
+      await activity.save();
+
+      EmailSender.sendEmail({
+        to: email,
+        subject: __({ phrase: 'suggestionAppliedEmail.title', locale: chosenLanguage }),
+        html: __({ phrase: 'suggestionAppliedEmail.content', locale: chosenLanguage }, clubName),
+      });
+    }
 
     ctx.body = {
       success: true,
@@ -177,26 +194,101 @@ class SuggestionsController {
 
   remove = async (ctx) => {
     const {
-      // user,
+      user,
       params: {
         suggestionId,
+      },
+      request: {
+        body: {
+          withMute,
+        },
       },
     } = ctx;
 
     const suggestionToBeRemoved = await Suggestion.findById(suggestionId);
-    // const suggestionToBeRemovedOriginal = _cloneDeep(suggestionToBeRemoved);
-    await suggestionToBeRemoved.remove();
 
-    // const activity = new Activity({
-    //   user,
-    //   originalObject: null,
-    //   objectType: 'suggestion',
-    //   actionType: 'remove',
-    //   before: suggestionToBeRemovedOriginal,
-    //   after: null,
-    // });
+    if (withMute) {
+      const { credentials: userCredentials } = user;
+      const suggestionUser = await suggestionToBeRemoved.getUser();
+      const suggestionUserCopy = _cloneDeep(suggestionUser);
+      const roles = await Role.find({});
 
-    // await activity.save();
+      const suggestionUserRoleId = suggestionUser.role.toString();
+      const userRoleId = roles.find(role => role.name === 'user')._id.toString();
+      const userDisabledRoleId = roles.find(role => role.name === 'userDisabled')._id.toString();
+
+      if ( // Moderators can only mute users (not other moderators)
+        (suggestionUserRoleId !== userRoleId && suggestionUserRoleId !== userDisabledRoleId)
+        && !userCredentials.includes('updateUser')
+      ) {
+        throw new ApiError(errorCodes.NotAuthorized);
+      }
+
+      Object.assign(suggestionUser, {
+        role: userDisabledRoleId,
+      });
+
+      await suggestionUser.save();
+
+      const activityUpdatingUser = new Activity({
+        user,
+        originalObject: null,
+        objectType: 'user',
+        actionType: 'update',
+        before: suggestionUserCopy,
+        after: suggestionUser,
+      });
+
+      await activityUpdatingUser.save();
+
+      const userSuggestions = await Suggestion.find({
+        user: suggestionUser,
+      });
+
+      await Promise.all(userSuggestions.map(suggestion => new Promise(async (resolve, reject) => {
+        try {
+          const activity = new Activity({
+            user,
+            originalObject: null,
+            objectType: 'suggestion',
+            actionType: 'remove',
+            before: suggestion,
+            after: null,
+          });
+
+          await activity.save();
+
+          resolve();
+        } catch (error) {
+          reject(new ApiError(errorCodes.Internal, error));
+        }
+      })));
+
+      await Suggestion.deleteMany({
+        user: suggestionUser,
+      });
+
+      const { email, chosenLanguage } = suggestionUser;
+      EmailSender.sendEmail({
+        to: email,
+        subject: __({ phrase: 'userDisabledEmail.title', locale: chosenLanguage }),
+        html: __({ phrase: 'userDisabledEmail.content', locale: chosenLanguage }),
+      });
+    } else {
+      const suggestionToBeRemovedCopy = _cloneDeep(suggestionToBeRemoved);
+      await suggestionToBeRemoved.remove();
+
+      const activity = new Activity({
+        user,
+        originalObject: null,
+        objectType: 'suggestion',
+        actionType: 'remove',
+        before: suggestionToBeRemovedCopy,
+        after: null,
+      });
+
+      await activity.save();
+    }
 
     ctx.body = {
       success: true,
@@ -205,7 +297,7 @@ class SuggestionsController {
 
   bulkRemove = async (ctx) => {
     const {
-      // user,
+      user,
       request: {
         body: {
           ids,
@@ -216,7 +308,19 @@ class SuggestionsController {
     const removePromises = ids.map(id => new Promise(async (resolve, reject) => {
       try {
         const suggestion = await Suggestion.findById(id); // Because of firing middleware
+        const suggestionCopy = _cloneDeep(suggestion);
         await suggestion.remove();
+
+        const activity = new Activity({
+          user,
+          originalObject: null,
+          objectType: 'suggestion',
+          actionType: 'remove',
+          before: suggestionCopy,
+          after: null,
+        });
+
+        await activity.save();
 
         resolve();
       } catch (error) {

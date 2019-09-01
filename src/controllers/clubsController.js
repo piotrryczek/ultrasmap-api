@@ -11,6 +11,7 @@ import {
   getRelationsToEdit,
   parseSearchQuery,
   singleClubDelete,
+  getRandomClub,
 } from '@utilities/helpers';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
@@ -36,7 +37,7 @@ class ClubsController {
         skip: (page - 1) * PER_PAGE,
         limit: PER_PAGE,
       },
-    );
+    ).sort({ createdAt: 'descending' });
 
     const allCount = await Club.countDocuments(parsedSearch);
 
@@ -50,12 +51,14 @@ class ClubsController {
     const { params } = ctx;
     const { clubId } = params;
 
-    const club = await Club.findById(clubId)
-      .populate('friendships')
-      .populate('agreements')
-      .populate('positives')
-      .populate('satellites')
-      .populate('satelliteOf');
+    const club = clubId === 'random'
+      ? await getRandomClub()
+      : await Club.findById(clubId)
+        .populate('friendships')
+        .populate('agreements')
+        .populate('positives')
+        .populate('satellites')
+        .populate('satelliteOf');
 
     ctx.body = {
       data: club,
@@ -73,7 +76,7 @@ class ClubsController {
 
     const {
       name,
-      tier,
+      tier = 3,
       location,
       // Relations
       friendships: receivedFriendships = [],
@@ -203,15 +206,15 @@ class ClubsController {
       );
     }
 
-    // const activity = new Activity({
-    //   user,
-    //   originalObject: newClub,
-    //   objectType: 'club',
-    //   actionType: 'add',
-    //   after: newClub,
-    // });
+    const activity = new Activity({
+      user,
+      originalObject: newClub,
+      objectType: 'club',
+      actionType: 'add',
+      after: newClub,
+    });
 
-    // await activity.save();
+    await activity.save();
 
     ctx.body = {
       data: newClubId,
@@ -243,7 +246,7 @@ class ClubsController {
     const {
       name,
       logo,
-      tier,
+      tier = 3,
       location,
       // Relations
       friendships: receivedFriendships = [],
@@ -520,7 +523,24 @@ class ClubsController {
 
     const addedClubs = await Club.insertMany(clubsToAdd);
 
-    // TODO: Activity
+    await Promise.all(addedClubs.map(addedClub => new Promise(async (resolve, reject) => {
+      try {
+        const activity = new Activity({
+          user,
+          originalObject: addedClub,
+          objectType: 'club',
+          actionType: 'add',
+          before: null,
+          after: addedClub,
+        });
+
+        await activity.save();
+
+        resolve();
+      } catch (error) {
+        reject(new ApiError(errorCodes.Internal, error));
+      }
+    })));
 
     ctx.body = {
       data: [...addedClubs, ...existingClubs],

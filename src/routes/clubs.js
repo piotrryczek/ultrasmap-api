@@ -29,6 +29,7 @@ router.put(
   upload.single('newLogo'),
   ClubsController.update,
 );
+// Currently unused
 router.delete(
   '/:clubId',
   retrieveUser,

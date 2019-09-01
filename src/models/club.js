@@ -15,6 +15,7 @@ const ClubSchema = new Schema({
   },
   tier: {
     type: Number,
+    default: 3,
   },
   location: {
     type: {
