@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "webpack --config webpack.production.js",
+    "build-demo": "webpack --config webpack.demo.js",
     "build-dev": "webpack --config webpack.development.js",
     "start": "babel-node src/server.js",
     "start-dev": "nodemon --exec babel-node src/server.js",

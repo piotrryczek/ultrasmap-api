@@ -44,10 +44,11 @@ class BackupsController {
     const {
       body: {
         fileName,
+        collectionsToRestore = ['roles', 'users', 'clubs', 'suggestions'],
       },
     } = request;
 
-    await Backup.restore(fileName);
+    await Backup.restore(fileName, collectionsToRestore);
 
     ctx.body = {
       success: true,
