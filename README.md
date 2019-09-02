@@ -4,6 +4,10 @@ The application visualizes relationships between supporters of sports teams and 
 
 piotrryczek@gmail.com
 
+- API https://github.com/piotrryczek/ultrasmap-api
+- Admin https://github.com/piotrryczek/ultrasmap-admin
+- Frontend https://github.com/piotrryczek/ultrasmap-front
+
 ## FanaticsMap: API
 REST style API for both admin and frontend part of the app.
 
@@ -67,6 +71,7 @@ Check status endpoint:
 - Uploads with resize & cropping into desired dimensions
 - Edit / remove / add club(s) synchronisation relations mechanism prohibiting from duplicating or losing it's mutuality
 - CRON for automatic backups and suggestions summary being send on email to moderators
+- CORS limited
 - Logging moderators and admins actions into activities
 - Backups creating and restoring functionality
 - Email sender
