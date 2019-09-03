@@ -82,20 +82,6 @@ export const singleClubDelete = async (userPerforming, clubId) => {
   await activity.save();
 };
 
-export const getRandomClub = async () => {
-  const count = await Club.countDocuments();
-  const random = Math.floor(Math.random() * count);
-
-  const club = await Club.findOne().skip(random)
-    .populate('friendships')
-    .populate('agreements')
-    .populate('positives')
-    .populate('satellites')
-    .populate('satelliteOf');
-
-  return club;
-};
-
 export const getAdminsAndModerators = async () => {
   const adminAndModeratorRoles = await Role.find({
     name: { $in: ['moderator', 'admin'] },

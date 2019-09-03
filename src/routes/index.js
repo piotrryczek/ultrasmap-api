@@ -1,6 +1,7 @@
 import combineRouters from 'koa-combine-routers';
 
 import appRoutes from './app';
+import administrationRoutes from './administration';
 import userRoutes from './users';
 import clubRoutes from './clubs';
 import suggestionRoutes from './suggestions';
@@ -12,6 +13,7 @@ import uploadsRoutes from './uploads';
 
 export default combineRouters(
   appRoutes,
+  administrationRoutes,
   userRoutes,
   clubRoutes,
   suggestionRoutes,

@@ -7,6 +7,8 @@ const { Schema } = mongoose;
 
 const fullObjectData = {
   name: String,
+  searchName: String,
+  transliterationName: String,
   logo: String,
   tier: Number,
   location: {

@@ -83,6 +83,7 @@ class MockData {
       name: 'admin',
       credentials: [
         'enterAdminPanel',
+        'administrationTools',
         'uploadFile',
         'getUser',
         'updateUser',

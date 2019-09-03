@@ -10,6 +10,12 @@ const ClubSchema = new Schema({
     type: String,
     required: true,
   },
+  transliterationName: {
+    type: String,
+  },
+  searchName: {
+    type: String,
+  },
   logo: {
     type: String,
   },

@@ -11,7 +11,6 @@ import {
   getRelationsToEdit,
   parseSearchQuery,
   singleClubDelete,
-  getRandomClub,
 } from '@utilities/helpers';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
@@ -30,6 +29,20 @@ class ClubsController {
 
     const parsedSearch = parseSearchQuery(JSON.parse(search));
 
+    if (parsedSearch.name) {
+      const { name: nameValue } = parsedSearch;
+
+      delete parsedSearch.name;
+
+      Object.assign(parsedSearch, {
+        $or: [
+          { name: nameValue },
+          { transliterationName: nameValue },
+          { searchName: nameValue },
+        ],
+      });
+    }
+
     const clubs = await Club.find(
       parsedSearch,
       null,
@@ -47,18 +60,27 @@ class ClubsController {
     };
   }
 
+  getRandomClubId = async (ctx) => {
+    const count = await Club.countDocuments();
+    const random = Math.floor(Math.random() * count);
+
+    const { _id: clubId } = await Club.findOne().skip(random);
+
+    ctx.body = {
+      data: clubId,
+    };
+  }
+
   get = async (ctx) => {
     const { params } = ctx;
     const { clubId } = params;
 
-    const club = clubId === 'random'
-      ? await getRandomClub()
-      : await Club.findById(clubId)
-        .populate('friendships')
-        .populate('agreements')
-        .populate('positives')
-        .populate('satellites')
-        .populate('satelliteOf');
+    const club = await Club.findById(clubId)
+      .populate('friendships')
+      .populate('agreements')
+      .populate('positives')
+      .populate('satellites')
+      .populate('satelliteOf');
 
     ctx.body = {
       data: club,
@@ -76,6 +98,8 @@ class ClubsController {
 
     const {
       name,
+      transliterationName,
+      searchName,
       tier = 3,
       location,
       // Relations
@@ -97,6 +121,8 @@ class ClubsController {
 
     const newClub = new Club({
       name,
+      transliterationName,
+      searchName,
       tier,
       location: {
         type: 'Point',
@@ -245,6 +271,8 @@ class ClubsController {
 
     const {
       name,
+      transliterationName,
+      searchName,
       logo,
       tier = 3,
       location,
@@ -269,6 +297,8 @@ class ClubsController {
 
     Object.assign(clubToBeUpdated, {
       name,
+      transliterationName,
+      searchName,
       logo,
       tier,
       location: {
@@ -597,10 +627,16 @@ class ClubsController {
       excluded = [],
     } = qs.parse(query);
 
+    const searchRegExp = new RegExp(searchName, 'i');
+
     const clubs = await Club.find(
       {
         _id: { $nin: excluded },
-        name: new RegExp(searchName, 'i'),
+        $or: [
+          { name: searchRegExp },
+          { searchName: searchRegExp },
+          { transliterationName: searchRegExp },
+        ],
       },
     );
 

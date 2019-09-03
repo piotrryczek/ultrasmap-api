@@ -8,6 +8,7 @@ const router = new Router({ prefix: '/clubs' });
 
 router.get('/', ClubsController.getPaginated);
 router.get('/possibleRelations', ClubsController.getPossibleRelations);
+router.get('/randomClubId', ClubsController.getRandomClubId);
 router.get('/:clubId', ClubsController.get);
 router.post(
   '/',
