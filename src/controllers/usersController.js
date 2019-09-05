@@ -43,13 +43,13 @@ class UsersController {
   }
 
   getPaginated = async (ctx) => {
-    const { query } = ctx;
+    const { queryParsed } = ctx;
     const {
       page = 1,
-      search = '{}',
-    } = query;
+      search = {},
+    } = queryParsed;
 
-    const parsedSearch = parseSearchQuery(JSON.parse(search));
+    const parsedSearch = parseSearchQuery(search);
 
     const users = await User.find(
       parsedSearch,

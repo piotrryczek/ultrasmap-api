@@ -7,14 +7,13 @@ import Activity from '@models/activity';
 
 class ActivitiesController {
   getPaginated = async (ctx) => {
-    const { query } = ctx;
-    const { page } = query;
-
+    const { queryParsed } = ctx;
     const {
-      search = '{}',
-    } = query;
+      page,
+      search = {},
+    } = queryParsed;
 
-    const parsedSearch = parseSearchQuery(JSON.parse(search));
+    const parsedSearch = parseSearchQuery(search);
 
     const activities = await Activity.find(
       parsedSearch,

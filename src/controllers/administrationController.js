@@ -1,4 +1,5 @@
 import { remove } from 'diacritics';
+import _set from 'lodash/set';
 
 import Club from '@models/club';
 import ApiError from '@utilities/apiError';
@@ -37,6 +38,29 @@ class AdministrationController {
     ctx.body = {
       success: true,
       alteredNumber: editPromises.length,
+    };
+  }
+
+  reverseGeo = async (ctx) => {
+    const clubs = await Club.find({});
+
+    await Promise.all(clubs.map(club => new Promise(async (resolve, reject) => {
+      try {
+        const { location: { coordinates } } = club;
+        const [lat, lng] = coordinates;
+
+        _set(club, 'location.coordinates', [lng, lat]);
+
+        await club.save();
+
+        resolve();
+      } catch (error) {
+        reject(new ApiError(errorCodes.Internal, error));
+      }
+    })));
+
+    ctx.body = {
+      success: true,
     };
   }
 }

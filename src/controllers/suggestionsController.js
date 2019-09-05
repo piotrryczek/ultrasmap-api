@@ -6,6 +6,7 @@ import { PER_PAGE } from '@config/config';
 import Suggestion from '@models/suggestion';
 import Activity from '@models/activity';
 import Role from '@models/role';
+import Club from '@models/club';
 
 import EmailSender from '@services/emailSender';
 import ApiError from '@utilities/apiError';
@@ -14,12 +15,12 @@ import ImageUpload from '@services/imageUpload';
 
 class SuggestionsController {
   getPaginated = async (ctx) => {
-    const { query } = ctx;
+    const { queryParsed } = ctx;
     const {
       page = 1,
       type,
       status = 'pending',
-    } = query;
+    } = queryParsed;
 
     const criteria = {
       status,
@@ -104,6 +105,12 @@ class SuggestionsController {
     } = body;
 
     const parsedData = JSON.parse(data);
+
+    const { name } = parsedData;
+
+    const isClubWithName = await Club.findOne({ name });
+
+    if (isClubWithName) throw new ApiError(errorCodes.ClubWithNameExists);
 
     Object.assign(parsedData, {
       location: {

@@ -1,13 +1,14 @@
 import Router from 'koa-router';
 
 import ClubsController from '@controllers/clubsController';
-import { retrieveUser, hasCredential } from '@utilities/middlewares';
+import { retrieveUser, hasCredential, queryStringMiddleware } from '@utilities/middlewares';
 import upload from '@utilities/multer';
 
 const router = new Router({ prefix: '/clubs' });
 
-router.get('/', ClubsController.getPaginated);
-router.get('/possibleRelations', ClubsController.getPossibleRelations);
+router.get('/', queryStringMiddleware, ClubsController.getPaginated);
+router.get('/geo', queryStringMiddleware, ClubsController.getWithinArea);
+router.get('/possibleRelations', queryStringMiddleware, ClubsController.getPossibleRelations);
 router.get('/randomClubId', ClubsController.getRandomClubId);
 router.get('/:clubId', ClubsController.get);
 router.post(

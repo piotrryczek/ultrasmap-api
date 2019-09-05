@@ -1,7 +1,7 @@
 import Router from 'koa-router';
 
 import SuggestionsController from '@controllers/suggestionsController';
-import { retrieveUser, hasCredential } from '@utilities/middlewares';
+import { retrieveUser, hasCredential, queryStringMiddleware } from '@utilities/middlewares';
 import upload from '@utilities/multer';
 
 const router = new Router({ prefix: '/suggestions' });
@@ -10,6 +10,7 @@ router.get(
   '/',
   retrieveUser,
   hasCredential('getSuggestion'),
+  queryStringMiddleware,
   SuggestionsController.getPaginated,
 );
 router.post(

@@ -9,7 +9,10 @@ import i18n from 'i18n';
 
 import logger from '@services/logger';
 import db from '@config/db';
-import { errorHandler, corsHandler } from '@utilities/middlewares';
+import {
+  errorHandler,
+  corsHandler,
+} from '@utilities/middlewares';
 
 import router from './routes';
 
@@ -37,6 +40,5 @@ app.on('error', (error) => {
 
 app.use(mount('/images', serve(`${process.cwd()}/uploads`)));
 app.use(router());
-
 
 export default app;

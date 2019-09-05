@@ -1,9 +1,18 @@
 import jwt from 'jsonwebtoken';
 import md5 from 'md5';
+import qs from 'qs';
 
 import User from '@models/user';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
+
+export const queryStringMiddleware = async (ctx, next) => {
+  const { query } = ctx;
+
+  ctx.queryParsed = qs.parse(query);
+
+  await next();
+}
 
 export const errorHandler = async (ctx, next) => {
   try {
@@ -84,7 +93,9 @@ export const checkMockPassword = async (ctx, next) => {
 };
 
 export const corsHandler = (ctx) => {
-  const acceptedOrigins = [process.env.APP_URL, process.env.ADMIN_URL, 'http://localhost:3000', 'http://localhost:3001'];
+  const acceptedOrigins = [...process.env.APP_URL.split(','), ...process.env.ADMIN_URL.split(',')];
+
+  if (process.env.ALLOW_CORS_LOCALHOST === '1') acceptedOrigins.push('http://localhost:3000', 'http://localhost:3001');
 
   const { accept: { headers: { origin } } } = ctx;
   if (!acceptedOrigins.includes(origin)) {

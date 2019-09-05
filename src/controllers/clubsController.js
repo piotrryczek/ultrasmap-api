@@ -1,7 +1,7 @@
-import qs from 'qs';
 import _cloneDeep from 'lodash/cloneDeep';
 import _difference from 'lodash/difference';
 import _pull from 'lodash/pull';
+import _get from 'lodash/get';
 
 import {
   PER_PAGE,
@@ -21,24 +21,28 @@ import Activity from '@models/activity';
 
 class ClubsController {
   getPaginated = async (ctx) => {
-    const { query } = ctx;
+    const { queryParsed } = ctx;
     const {
       page = 1,
-      search = '{}',
-    } = query;
+      search = {},
+      excluded = [],
+    } = queryParsed;
 
-    const parsedSearch = parseSearchQuery(JSON.parse(search));
+    const parsedSearch = parseSearchQuery(search);
 
-    if (parsedSearch.name) {
-      const { name: nameValue } = parsedSearch;
+    const searchName = _get(search, 'name.value', null);
+
+    if (searchName) {
+      const { name: nameRegExp } = parsedSearch;
 
       delete parsedSearch.name;
 
       Object.assign(parsedSearch, {
+        _id: { $nin: excluded },
         $or: [
-          { name: nameValue },
-          { transliterationName: nameValue },
-          { searchName: nameValue },
+          { name: nameRegExp },
+          { transliterationName: nameRegExp },
+          { searchName: nameRegExp },
         ],
       });
     }
@@ -52,6 +56,10 @@ class ClubsController {
       },
     ).sort({ createdAt: 'descending' });
 
+    if (searchName) {
+      clubs.sort(a => (a.name.toLowerCase().startsWith(searchName) ? -1 : 1)); // TODO: rethink, it is sorting only results from DB, search results improved but far from best
+    }
+
     const allCount = await Club.countDocuments(parsedSearch);
 
     ctx.body = {
@@ -60,12 +68,39 @@ class ClubsController {
     };
   }
 
+  getWithinArea = async (ctx) => {
+    const { queryParsed } = ctx;
+    const {
+      northWest,
+      southWest,
+      northEast,
+      southEast,
+    } = queryParsed;
+
+    const areaToSearch = {
+      type: 'Polygon',
+      coordinates: [[
+        northWest,
+        northEast,
+        southEast,
+        southWest,
+        northWest,
+      ]],
+    };
+
+    const clubs = await Club.find({}).where('location').within(areaToSearch);
+
+    ctx.body = {
+      data: clubs,
+    };
+  }
+
   getRandomClubId = async (ctx) => {
     const count = await Club.countDocuments();
     const random = Math.floor(Math.random() * count);
 
     const { _id: clubId } = await Club.findOne().skip(random);
-
+ 
     ctx.body = {
       data: clubId,
     };
@@ -98,6 +133,7 @@ class ClubsController {
 
     const {
       name,
+      logo,
       transliterationName,
       searchName,
       tier = 3,
@@ -121,6 +157,7 @@ class ClubsController {
 
     const newClub = new Club({
       name,
+      logo, // via suggestion
       transliterationName,
       searchName,
       tier,
@@ -274,7 +311,7 @@ class ClubsController {
       transliterationName,
       searchName,
       logo,
-      tier = 3,
+      tier,
       location,
       // Relations
       friendships: receivedFriendships = [],
@@ -297,10 +334,7 @@ class ClubsController {
 
     Object.assign(clubToBeUpdated, {
       name,
-      transliterationName,
-      searchName,
       logo,
-      tier,
       location: {
         type: 'Point',
         coordinates: JSON.parse(location),
@@ -311,6 +345,10 @@ class ClubsController {
       satellites,
       satelliteOf,
     });
+
+    if (typeof transliterationName === 'string') Object.assign(clubToBeUpdated, { transliterationName });
+    if (typeof searchName === 'string') Object.assign(clubToBeUpdated, { searchName });
+    if (tier) Object.assign(clubToBeUpdated, { tier });
 
     if (!clubToBeUpdated.validateRelations()) throw new ApiError(errorCodes.RelationsNotUnique);
     await clubToBeUpdated.validate();
@@ -621,11 +659,11 @@ class ClubsController {
   }
 
   getPossibleRelations = async (ctx) => {
-    const { query } = ctx;
+    const { queryParsed } = ctx;
     const {
       searchName,
       excluded = [],
-    } = qs.parse(query);
+    } = queryParsed;
 
     const searchRegExp = new RegExp(searchName, 'i');
 

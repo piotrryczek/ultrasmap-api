@@ -2,7 +2,7 @@ import Router from 'koa-router';
 
 import AuthController from '@controllers/authController';
 import UsersController from '@controllers/usersController';
-import { retrieveUser, hasCredential, isNotLogged } from '@utilities/middlewares';
+import { retrieveUser, hasCredential, isNotLogged, queryStringMiddleware } from '@utilities/middlewares';
 
 const router = new Router({ prefix: '/users' });
 
@@ -10,6 +10,7 @@ router.get(
   '/',
   retrieveUser,
   hasCredential('getUser'),
+  queryStringMiddleware,
   UsersController.getPaginated,
 );
 router.get(
