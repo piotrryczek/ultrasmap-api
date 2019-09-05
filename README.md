@@ -13,7 +13,7 @@ REST style API for both admin and frontend part of the app.
 
 - Demo: http://ultrasmap-demo.nero12.usermd.net
 - Developer: http://ultrasmap-dev.nero12.usermd.net
-- Production: *soon*
+- Production: https://ultrasmap-prod.nero12.usermd.net
 
 ### Build
 MongoDB database required.
