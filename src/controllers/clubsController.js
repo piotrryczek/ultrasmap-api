@@ -402,7 +402,7 @@ class ClubsController {
           },
           {
             $set: {
-              satelliteOf: clubId,
+              satelliteOf: null,
             },
           },
         );
@@ -680,6 +680,19 @@ class ClubsController {
 
     ctx.body = {
       data: clubs,
+    };
+  }
+
+  getActivities = async (ctx) => {
+    const { params } = ctx;
+    const { clubId } = params;
+
+    const activities = await Activity.find({ originalObject: clubId })
+      .sort({ createdAt: 'descending' })
+      .populate('user');
+
+    ctx.body = {
+      data: activities,
     };
   }
 }

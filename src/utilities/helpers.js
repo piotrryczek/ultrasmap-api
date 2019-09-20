@@ -1,5 +1,6 @@
 import _intersection from 'lodash/intersection';
 import _cloneDeep from 'lodash/cloneDeep';
+import _set from 'lodash/set';
 import fromEntries from 'object.fromentries';
 
 import ApiError from '@utilities/apiError';
@@ -122,4 +123,45 @@ export const createSuggestionsSummary = async () => {
     subject: `Sugestie (${pendingSuggestions.length}) oczekują na weryfikację (${process.env.ADMIN_URL})`,
     html: `<ul>${suggestionsHtml.join('')}</ul>`,
   });
+};
+
+const clubIdsToObjects = (ids, clubs) => ids.map((id) => {
+  const finalClub = clubs.find(({ _id: clubId }) => clubId.toString() === id.toString());
+
+  return finalClub || null;
+});
+
+export const fillRelationshipsClubsByIdForActivity = (activity, clubs) => {
+  const {
+    before,
+    after: {
+      friendships: afterFriendships,
+      agreements: afterAgreements,
+      positives: afterPositives,
+      satellites: afterSatellites,
+      satelliteOf: afterSatelliteOf,
+    },
+  } = activity;
+
+  if (before) {
+    const {
+      friendships: beforeFriendships,
+      agreements: beforeAgreements,
+      positives: beforePositives,
+      satellites: beforeSatellites,
+      satelliteOf: beforeSatelliteOf,
+    } = before;
+
+    if (beforeFriendships && beforeFriendships.length) _set(activity, 'before.friendships', clubIdsToObjects(beforeFriendships, clubs));
+    if (beforeAgreements && beforeAgreements.length) _set(activity, 'before.agreements', clubIdsToObjects(beforeAgreements, clubs));
+    if (beforePositives && beforePositives.length) _set(activity, 'before.positives', clubIdsToObjects(beforePositives, clubs));
+    if (beforeSatellites && beforeSatellites.length) _set(activity, 'before.satellites', clubIdsToObjects(beforeSatellites, clubs));
+    if (beforeSatelliteOf) _set(activity, 'before.satelliteOf', clubs.find(club => club._id.toString() === beforeSatelliteOf.toString()) || null);
+  }
+
+  if (afterFriendships && afterFriendships.length) _set(activity, 'after.friendships', clubIdsToObjects(afterFriendships, clubs));
+  if (afterAgreements && afterAgreements.length) _set(activity, 'after.agreements', clubIdsToObjects(afterAgreements, clubs));
+  if (afterPositives && afterPositives.length) _set(activity, 'after.positives', clubIdsToObjects(afterPositives, clubs));
+  if (afterSatellites && afterSatellites.length) _set(activity, 'after.satellites', clubIdsToObjects(afterSatellites, clubs));
+  if (afterSatelliteOf) _set(activity, 'after.satelliteOf', clubs.find(club => club._id.toString() === afterSatelliteOf.toString()) || null);
 };

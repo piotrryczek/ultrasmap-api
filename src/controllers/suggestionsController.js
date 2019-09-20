@@ -108,9 +108,10 @@ class SuggestionsController {
 
     const { name } = parsedData;
 
-    const isClubWithName = await Club.findOne({ name });
-
-    if (isClubWithName) throw new ApiError(errorCodes.ClubWithNameExists);
+    if (type === 'new') {
+      const isClubWithName = await Club.findOne({ name });
+      if (isClubWithName) throw new ApiError(errorCodes.ClubWithNameExists);
+    }
 
     Object.assign(parsedData, {
       location: {

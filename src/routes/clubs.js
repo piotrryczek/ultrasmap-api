@@ -11,6 +11,12 @@ router.get('/geo', queryStringMiddleware, ClubsController.getWithinArea);
 router.get('/possibleRelations', queryStringMiddleware, ClubsController.getPossibleRelations);
 router.get('/randomClubId', ClubsController.getRandomClubId);
 router.get('/:clubId', ClubsController.get);
+router.get(
+  '/:clubId/activities',
+  retrieveUser,
+  hasCredential('getActivity'),
+  ClubsController.getActivities,
+);
 router.post(
   '/',
   retrieveUser,

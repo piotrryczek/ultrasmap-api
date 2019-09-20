@@ -11,6 +11,9 @@ const ActivitySchema = new Schema({
   originalObject: {
     type: Schema.Types.ObjectId,
   },
+  originalObjectName: {
+    type: Schema.Types.String,
+  },
   objectType: {
     type: String,
     enum: [

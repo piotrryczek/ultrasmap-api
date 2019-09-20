@@ -36,7 +36,7 @@ class AuthController {
     await EmailSender.sendEmail({
       to: email,
       subject: __({ phrase: 'registerEmail.title', locale: language }),
-      html: `<a href="${process.env.APP_URL}/confirm/${verificationCode}">${__({ phrase: 'registerEmail.clickLink', locale: language })}</a>`,
+      html: `<a href="${process.env.MAIN_APP_URL}/confirm/${verificationCode}">${__({ phrase: 'registerEmail.clickLink', locale: language })}</a>`,
     });
 
     ctx.body = {

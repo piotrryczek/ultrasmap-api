@@ -13,4 +13,11 @@ router.get(
   ActivitiesController.getPaginated,
 );
 
+router.get(
+  '/:activityId',
+  retrieveUser,
+  hasCredential('getActivity'),
+  ActivitiesController.get,
+);
+
 export default router;

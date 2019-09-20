@@ -17,7 +17,7 @@ import {
 import router from './routes';
 
 i18n.configure({
-  locales: ['pl', 'en'],
+  locales: ['pl', 'en', 'ru'],
   directory: `${process.cwd()}/locales`,
 });
 
