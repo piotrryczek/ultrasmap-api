@@ -65,6 +65,12 @@ class SuggestionsController {
       .populate({
         path: 'original',
         populate: {
+          path: 'enemies',
+        },
+      })
+      .populate({
+        path: 'original',
+        populate: {
           path: 'satellites',
         },
       })
@@ -77,6 +83,7 @@ class SuggestionsController {
       .populate('data.friendships')
       .populate('data.agreements')
       .populate('data.positives')
+      .populate('data.enemies')
       .populate('data.satellites')
       .populate('data.satelliteOf');
 

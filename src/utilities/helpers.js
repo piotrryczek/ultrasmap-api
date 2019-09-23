@@ -135,26 +135,32 @@ export const fillRelationshipsClubsByIdForActivity = (activity, clubs) => {
   const {
     before,
     after: {
-      friendships: afterFriendships,
-      agreements: afterAgreements,
-      positives: afterPositives,
-      satellites: afterSatellites,
+      friendships: afterFriendships = [],
+      agreements: afterAgreements = [],
+      positives: afterPositives = [],
+      enemies: afterEnemies = [],
+      derbyRivalries: afterDerbyRivalries = [],
+      satellites: afterSatellites = [],
       satelliteOf: afterSatelliteOf,
     },
   } = activity;
 
   if (before) {
     const {
-      friendships: beforeFriendships,
-      agreements: beforeAgreements,
-      positives: beforePositives,
-      satellites: beforeSatellites,
+      friendships: beforeFriendships = [],
+      agreements: beforeAgreements = [],
+      positives: beforePositives = [],
+      enemies: beforeEnemies = [],
+      derbyRivalries: beforeDerbyRivalries = [],
+      satellites: beforeSatellites = [],
       satelliteOf: beforeSatelliteOf,
     } = before;
 
     if (beforeFriendships && beforeFriendships.length) _set(activity, 'before.friendships', clubIdsToObjects(beforeFriendships, clubs));
     if (beforeAgreements && beforeAgreements.length) _set(activity, 'before.agreements', clubIdsToObjects(beforeAgreements, clubs));
     if (beforePositives && beforePositives.length) _set(activity, 'before.positives', clubIdsToObjects(beforePositives, clubs));
+    if (beforeEnemies && beforeEnemies.length) _set(activity, 'before.enemies', clubIdsToObjects(beforeEnemies, clubs));
+    if (beforeDerbyRivalries && beforeDerbyRivalries.length) _set(activity, 'before.derbyRivalries', clubIdsToObjects(beforeDerbyRivalries, clubs));
     if (beforeSatellites && beforeSatellites.length) _set(activity, 'before.satellites', clubIdsToObjects(beforeSatellites, clubs));
     if (beforeSatelliteOf) _set(activity, 'before.satelliteOf', clubs.find(club => club._id.toString() === beforeSatelliteOf.toString()) || null);
   }
@@ -162,6 +168,8 @@ export const fillRelationshipsClubsByIdForActivity = (activity, clubs) => {
   if (afterFriendships && afterFriendships.length) _set(activity, 'after.friendships', clubIdsToObjects(afterFriendships, clubs));
   if (afterAgreements && afterAgreements.length) _set(activity, 'after.agreements', clubIdsToObjects(afterAgreements, clubs));
   if (afterPositives && afterPositives.length) _set(activity, 'after.positives', clubIdsToObjects(afterPositives, clubs));
+  if (afterEnemies && afterEnemies.length) _set(activity, 'after.enemies', clubIdsToObjects(afterEnemies, clubs));
+  if (afterDerbyRivalries && afterDerbyRivalries.length) _set(activity, 'after.derbyRivalries', clubIdsToObjects(afterDerbyRivalries, clubs));
   if (afterSatellites && afterSatellites.length) _set(activity, 'after.satellites', clubIdsToObjects(afterSatellites, clubs));
   if (afterSatelliteOf) _set(activity, 'after.satelliteOf', clubs.find(club => club._id.toString() === afterSatelliteOf.toString()) || null);
 };

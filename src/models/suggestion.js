@@ -40,6 +40,11 @@ const fullObjectData = {
     type: Schema.Types.ObjectId,
     ref: 'Club',
   }],
+  enemiesToCreate: [String],
+  enemies: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Club',
+  }],
   satelliteOfToCreate: String,
   satelliteOf: {
     type: Schema.Types.ObjectId,

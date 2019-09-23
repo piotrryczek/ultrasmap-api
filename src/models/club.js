@@ -6,6 +6,10 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const ClubSchema = new Schema({
+  visible: {
+    type: Boolean,
+    default: true,
+  },
   name: {
     type: String,
     required: true,
@@ -51,6 +55,14 @@ const ClubSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Club',
   }],
+  enemies: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Club',
+  }],
+  derbyRivalries: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Club',
+  }],
   satelliteOf: {
     type: Schema.Types.ObjectId,
     ref: 'Club',
@@ -67,9 +79,10 @@ ClubSchema.method('validateRelations', function () {
     agreements = [],
     positives = [],
     satellites = [],
+    enemies = [],
   } = this;
 
-  const allRelations = [satelliteOf, ...friendships, ...agreements, ...positives, ...satellites];
+  const allRelations = [satelliteOf, ...friendships, ...agreements, ...positives, ...satellites, ...enemies];
   const uniqueRelations = _uniq(allRelations);
 
   if (allRelations.length !== uniqueRelations.length) return false;
@@ -91,6 +104,8 @@ ClubSchema.post('remove', async function (document, next) {
           friendships: clubId,
           positives: clubId,
           satellites: clubId,
+          enemies: clubId,
+          derbyRivalries: clubId,
         },
       },
       {

@@ -14,6 +14,7 @@ import {
 } from '@utilities/helpers';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
+import estimateClubsAttitude from '@utilities/estimateClubsAttitude';
 import ImageUpload from '@services/imageUpload';
 
 import Club from '@models/club';
@@ -115,6 +116,8 @@ class ClubsController {
       .populate('agreements')
       .populate('positives')
       .populate('satellites')
+      .populate('enemies')
+      .populate('derbyRivalries')
       .populate('satelliteOf');
 
     ctx.body = {
@@ -143,6 +146,8 @@ class ClubsController {
       agreements: receivedAgreements = [],
       positives: receivedPositives = [],
       satellites: receivedSatellites = [],
+      enemies: receivedEnemies = [],
+      derbyRivalries: receivedDerbyRivalries = [],
       satelliteOf = null,
     } = body;
 
@@ -154,6 +159,8 @@ class ClubsController {
     const agreements = JSON.parse(receivedAgreements);
     const positives = JSON.parse(receivedPositives);
     const satellites = JSON.parse(receivedSatellites);
+    const enemies = JSON.parse(receivedEnemies);
+    const derbyRivalries = JSON.parse(receivedDerbyRivalries);
 
     const newClub = new Club({
       name,
@@ -169,6 +176,8 @@ class ClubsController {
       agreements,
       positives,
       satellites,
+      enemies,
+      derbyRivalries,
       satelliteOf,
     });
 
@@ -255,6 +264,34 @@ class ClubsController {
       );
     }
 
+    // Enemies
+    if (enemies.length) {
+      await Club.updateMany(
+        {
+          _id: { $in: enemies },
+        },
+        {
+          $addToSet: {
+            enemies: newClubId,
+          },
+        },
+      );
+    }
+
+    // derbyRivalries
+    if (derbyRivalries.length) {
+      await Club.updateMany(
+        {
+          _id: { $in: derbyRivalries },
+        },
+        {
+          $addToSet: {
+            derbyRivalries: newClubId,
+          },
+        },
+      );
+    }
+
     // SatelliteOf
     if (satelliteOf) {
       await Club.updateOne(
@@ -303,6 +340,8 @@ class ClubsController {
       agreements: prevAgreements = [],
       positives: prevPositives = [],
       satellites: prevSatellites = [],
+      enemies: prevEnemies = [],
+      derbyRivalries: prevDerbyRivalries = [],
       satelliteOf: prevSatelliteOf = null,
     } = clubBeforeUpdate;
 
@@ -318,6 +357,8 @@ class ClubsController {
       agreements: receivedAgreements = [],
       positives: receivedPositives = [],
       satellites: receivedSatellites = [],
+      enemies: receivedEnemies = [],
+      derbyRivalries: receivedDerbyRivalries = [],
       satelliteOf = null,
     } = body;
 
@@ -327,6 +368,8 @@ class ClubsController {
     const friendships = JSON.parse(receivedFriendships);
     const agreements = JSON.parse(receivedAgreements);
     const positives = JSON.parse(receivedPositives);
+    const enemies = JSON.parse(receivedEnemies);
+    const derbyRivalries = JSON.parse(receivedDerbyRivalries);
     const satellites = JSON.parse(receivedSatellites);
 
     const clubToBeUpdated = await Club.findById(clubId);
@@ -343,6 +386,8 @@ class ClubsController {
       agreements,
       positives,
       satellites,
+      enemies,
+      derbyRivalries,
       satelliteOf,
     });
 
@@ -507,6 +552,70 @@ class ClubsController {
       );
     }
 
+    // Enemies
+    const {
+      toAdd: enemiesToAdd,
+      toRemove: enemiesToRemove,
+    } = getRelationsToEdit(prevEnemies, enemies);
+
+    if (enemiesToAdd.length) {
+      await Club.updateMany(
+        {
+          _id: { $in: enemiesToAdd },
+        },
+        {
+          $addToSet: {
+            enemies: clubId,
+          },
+        },
+      );
+    }
+
+    if (enemiesToRemove.length) {
+      await Club.updateMany(
+        {
+          _id: { $in: enemiesToRemove },
+        },
+        {
+          $pull: {
+            enemies: clubId,
+          },
+        },
+      );
+    }
+
+    // Derby Rivalries
+    const {
+      toAdd: derbyRivalriesToAdd,
+      toRemove: derbyRivalriesToRemove,
+    } = getRelationsToEdit(prevDerbyRivalries, derbyRivalries);
+
+    if (derbyRivalriesToAdd.length) {
+      await Club.updateMany(
+        {
+          _id: { $in: derbyRivalriesToAdd },
+        },
+        {
+          $addToSet: {
+            derbyRivalries: clubId,
+          },
+        },
+      );
+    }
+
+    if (derbyRivalriesToRemove.length) {
+      await Club.updateMany(
+        {
+          _id: { $in: derbyRivalriesToRemove },
+        },
+        {
+          $pull: {
+            derbyRivalries: clubId,
+          },
+        },
+      );
+    }
+
     // SatelliteOf
     if (satelliteOf) { // adding satellite to satellites
       await Club.updateOne(
@@ -659,11 +768,14 @@ class ClubsController {
   }
 
   getPossibleRelations = async (ctx) => {
-    const { queryParsed } = ctx;
     const {
-      searchName,
-      excluded = [],
-    } = queryParsed;
+      request: {
+        body: {
+          searchName,
+          excluded = [],
+        },
+      },
+    } = ctx;
 
     const searchRegExp = new RegExp(searchName, 'i');
 
@@ -693,6 +805,21 @@ class ClubsController {
 
     ctx.body = {
       data: activities,
+    };
+  }
+
+  estimateAttitude = async (ctx) => {
+    const {
+      params: {
+        firstClubId,
+        secondClubId,
+      }
+    } = ctx;
+
+    const result = await estimateClubsAttitude(firstClubId, secondClubId);
+
+    ctx.body = {
+      data: result,
     };
   }
 }

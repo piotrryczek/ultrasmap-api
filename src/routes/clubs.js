@@ -8,8 +8,9 @@ const router = new Router({ prefix: '/clubs' });
 
 router.get('/', queryStringMiddleware, ClubsController.getPaginated);
 router.get('/geo', queryStringMiddleware, ClubsController.getWithinArea);
-router.get('/possibleRelations', queryStringMiddleware, ClubsController.getPossibleRelations);
+router.post('/possibleRelations', ClubsController.getPossibleRelations); // POST because of query string limit
 router.get('/randomClubId', ClubsController.getRandomClubId);
+router.get('/estimateAttitude/:firstClubId/:secondClubId', ClubsController.estimateAttitude);
 router.get('/:clubId', ClubsController.get);
 router.get(
   '/:clubId/activities',

@@ -23,28 +23,32 @@ class ActivitiesController {
       const {
         before,
         after: {
-          friendships: afterFriendships,
-          agreements: afterAgreements,
-          positives: afterPositives,
-          satellites: afterSatellites,
+          friendships: afterFriendships = [],
+          agreements: afterAgreements = [],
+          positives: afterPositives = [],
+          enemies: afterEnemies = [],
+          derbyRivalries: afterDerbyRivalries = [],
+          satellites: afterSatellites = [],
           satelliteOf: afterSatelliteOf,
         },
       } = activity;
 
-      const allRelationshipsIds = [...afterFriendships, ...afterAgreements, ...afterPositives, ...afterSatellites];
+      const allRelationshipsIds = [...afterFriendships, ...afterAgreements, ...afterPositives, ...afterEnemies, ...afterDerbyRivalries,  ...afterSatellites];
 
       if (afterSatelliteOf) allRelationshipsIds.push(afterSatelliteOf);
 
       if (before) {
         const {
-          friendships: beforeFriendships,
-          agreements: beforeAgreements,
-          positives: beforePositives,
-          satellites: beforeSatellites,
+          friendships: beforeFriendships = [],
+          agreements: beforeAgreements = [],
+          positives: beforePositives = [],
+          enemies: beforeEnemies = [],
+          derbyRivalries: beforeDerbyRivalries = [],
+          satellites: beforeSatellites = [],
           satelliteOf: beforeSatelliteOf,
         } = before;
 
-        allRelationshipsIds.push(...beforeFriendships, ...beforeAgreements, ...beforePositives, ...beforeSatellites);
+        allRelationshipsIds.push(...beforeFriendships, ...beforeAgreements, ...beforePositives, ...beforeEnemies, ...beforeDerbyRivalries, ...beforeSatellites);
         if (beforeSatelliteOf) allRelationshipsIds.push(beforeSatelliteOf);
       }
 
