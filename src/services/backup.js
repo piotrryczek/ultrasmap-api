@@ -6,6 +6,7 @@ import Club from '@models/club';
 import User from '@models/user';
 import Role from '@models/role';
 import Suggestion from '@models/suggestion';
+import League from '@models/league';
 
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
@@ -17,12 +18,14 @@ class Backup {
       const clubs = await Club.find({});
       const roles = await Role.find({});
       const suggestions = await Suggestion.find({});
+      const leagues = await League.find({});
 
       const finalJson = {
         clubs,
         users,
         roles,
         suggestions,
+        leagues,
       };
 
       const fileName = `${moment().format('YYYY-MM-DD HH-mm-ss')}.json`;
@@ -54,6 +57,7 @@ class Backup {
         clubs,
         roles,
         suggestions,
+        leagues,
       } = JSON.parse(fileData);
 
       if (collectionsToRetore.includes('roles')) {
@@ -74,6 +78,11 @@ class Backup {
       if (collectionsToRetore.includes('suggestions')) {
         await Suggestion.deleteMany({});
         await Suggestion.insertMany(suggestions);
+      }
+
+      if (collectionsToRetore.includes('leagues')) {
+        await League.deleteMany({});
+        await League.insertMany(leagues);
       }
     } catch (error) {
       throw new ApiError(errorCodes.Internal, error);

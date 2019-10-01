@@ -7,10 +7,12 @@ import upload from '@utilities/multer';
 const router = new Router({ prefix: '/clubs' });
 
 router.get('/', queryStringMiddleware, ClubsController.getPaginated);
+router.get('/byTier', ClubsController.getAllByTier);
 router.get('/geo', queryStringMiddleware, ClubsController.getWithinArea);
 router.post('/possibleRelations', ClubsController.getPossibleRelations); // POST because of query string limit
 router.get('/randomClubId', ClubsController.getRandomClubId);
-router.get('/estimateAttitude/:firstClubId/:secondClubId', ClubsController.estimateAttitude);
+router.get('/estimateAttitude/:firstClubId/:secondClubId', queryStringMiddleware, ClubsController.estimateAttitude);
+router.get('/searchByName', queryStringMiddleware, ClubsController.searchByName);
 router.get('/:clubId', ClubsController.get);
 router.get(
   '/:clubId/activities',
@@ -50,6 +52,12 @@ router.delete(
   retrieveUser,
   hasCredential('updateUser'),
   ClubsController.bulkRemove,
+);
+router.patch(
+  '/updateTiers',
+  retrieveUser,
+  hasCredential('updateClub'),
+  ClubsController.bulkUpdateTiers,
 );
 
 export default router;

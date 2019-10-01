@@ -5,6 +5,10 @@ import '@models/club';
 import '@models/role';
 import '@models/suggestion';
 import '@models/user';
+import '@models/match';
+import '@models/league';
+import '@models/country';
+
 
 const connectionUrl = process.env.MONGO_CONNECTION;
 

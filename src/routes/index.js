@@ -10,6 +10,8 @@ import roleRoutes from './roles';
 import mockRoutes from './mock';
 import backupsRoutes from './backups';
 import uploadsRoutes from './uploads';
+import leaguesRoutes from './leagues';
+import matchesRoutes from './matches';
 
 export default combineRouters(
   appRoutes,
@@ -22,4 +24,6 @@ export default combineRouters(
   mockRoutes,
   backupsRoutes,
   uploadsRoutes,
+  leaguesRoutes,
+  matchesRoutes,
 );

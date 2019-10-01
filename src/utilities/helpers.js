@@ -25,7 +25,7 @@ export const getRelationsToEdit = (prevRelations, newRelations) => {
   };
 };
 
-const escapeRegExp = string => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+export const escapeRegExp = string => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export const parseSearchQuery = searchQuery => fromEntries(Object.entries(searchQuery).map(([key, { type, value }]) => {
   switch (type) {

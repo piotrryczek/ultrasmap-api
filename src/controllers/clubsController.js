@@ -14,10 +14,11 @@ import {
 } from '@utilities/helpers';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
-import estimateClubsAttitude from '@utilities/estimateClubsAttitude';
+import estimateClubsAttitude from '@utilities/estimation/estimateClubsAttitude';
 import ImageUpload from '@services/imageUpload';
 
 import Club from '@models/club';
+import League from '@models/league';
 import Activity from '@models/activity';
 
 class ClubsController {
@@ -69,6 +70,14 @@ class ClubsController {
     };
   }
 
+  getAllByTier = async (ctx) => {
+    const clubs = await Club.find({}).select('name transliterationName tier').sort({ tier: 'descending' });
+
+    ctx.body = {
+      data: clubs,
+    };
+  }
+
   getWithinArea = async (ctx) => {
     const { queryParsed } = ctx;
     const {
@@ -101,7 +110,7 @@ class ClubsController {
     const random = Math.floor(Math.random() * count);
 
     const { _id: clubId } = await Club.findOne().skip(random);
- 
+
     ctx.body = {
       data: clubId,
     };
@@ -118,7 +127,8 @@ class ClubsController {
       .populate('satellites')
       .populate('enemies')
       .populate('derbyRivalries')
-      .populate('satelliteOf');
+      .populate('satelliteOf')
+      .populate('league');
 
     ctx.body = {
       data: club,
@@ -808,18 +818,68 @@ class ClubsController {
     };
   }
 
+  bulkUpdateTiers = async (ctx) => {
+    const {
+      request: {
+        body,
+      },
+    } = ctx;
+
+    const toUpdateArr = Object.entries(body);
+
+    await Promise.all(toUpdateArr.map(([clubId, tier]) => new Promise(async (resolve, reject) => {
+      try {
+        const club = await Club.findById(clubId);
+
+        Object.assign(club, { tier });
+
+        await club.save();
+
+        resolve();
+      } catch (error) {
+        reject(new ApiError(errorCodes.Internal, error));
+      }
+    })));
+
+    ctx.body = {
+      success: true,
+    };
+  }
+
   estimateAttitude = async (ctx) => {
     const {
+      queryParsed,
       params: {
         firstClubId,
         secondClubId,
-      }
+      },
     } = ctx;
 
-    const result = await estimateClubsAttitude(firstClubId, secondClubId);
+    const isFirstClubReserve = queryParsed.isFirstClubReserve === '1';
+    const isSecondClubReserve = queryParsed.isSecondClubReserve === '1';
+    const league = queryParsed.league ? await League.findById(queryParsed.league) : null;
+
+    const result = await estimateClubsAttitude({
+      firstClubId: firstClubId === 'unimportant' ? null : firstClubId,
+      secondClubId: secondClubId === 'unimportant' ? null : secondClubId,
+      isFirstClubReserve,
+      isSecondClubReserve,
+      league,
+    });
 
     ctx.body = {
       data: result,
+    };
+  }
+
+  searchByName = async (ctx) => {
+    const { queryParsed } = ctx;
+    const { search } = queryParsed;
+
+    const maybeFoundClub = await Club.findByName(search);
+
+    ctx.body = {
+      data: maybeFoundClub || false,
     };
   }
 }

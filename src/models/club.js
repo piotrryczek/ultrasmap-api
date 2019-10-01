@@ -1,5 +1,10 @@
 /* eslint-disable func-names */
+import _ from 'lodash';
 import _uniq from 'lodash/uniq';
+
+import ApiError from '@utilities/apiError';
+import errorCodes from '@config/errorCodes';
+import { escapeRegExp } from '@utilities/helpers';
 
 import mongoose from 'mongoose';
 
@@ -26,6 +31,10 @@ const ClubSchema = new Schema({
   tier: {
     type: Number,
     default: 3,
+  },
+  league: {
+    type: Schema.Types.ObjectId,
+    ref: 'League',
   },
   location: {
     type: {
@@ -126,5 +135,56 @@ ClubSchema.post('remove', async function (document, next) {
 
   next();
 });
+
+ClubSchema.statics.findByName = async function (search) {
+  const maybeFoundClub = await this.findOne({ name: search });
+
+  if (maybeFoundClub) return { club: maybeFoundClub, isReserve: false };
+
+  const searchParts = search.split(/ |-/);
+
+  const isReserve = searchParts.some(searchPart => searchPart === 'II');
+
+  const partResults = await Promise.all(searchParts.map(part => new Promise(async (resolve, reject) => {
+    try {
+      const nameRegExp = new RegExp(escapeRegExp(part), 'i');
+
+      const clubs = await this.find({
+        $or: [
+          { name: nameRegExp },
+          { transliterationName: nameRegExp },
+          { searchName: nameRegExp },
+        ],
+      });
+
+      resolve(clubs);
+    } catch (error) {
+      reject(new ApiError(errorCodes.Internal, error));
+    }
+  })));
+
+  const finalResults = [...partResults.reduce((acc, results) => {
+    acc.push(...results);
+
+    return acc;
+  }, [])];
+
+  if (searchParts.length > 2 && finalResults.length < 3) return null;
+
+  const groupedById = _.chain(finalResults)
+    .groupBy(club => club.id.toString())
+    .map((value, key) => ({ id: key, nrClubs: value.length }))
+    .sortBy(groupedItem => groupedItem.nrClubs)
+    .reverse()
+    .value();
+
+  const [foundGroupedItem] = groupedById;
+  const { id: foundId } = foundGroupedItem;
+
+  return {
+    club: finalResults.find(result => result.id.toString() === foundId),
+    isReserve,
+  };
+};
 
 export default mongoose.models.Club || mongoose.model('Club', ClubSchema);
