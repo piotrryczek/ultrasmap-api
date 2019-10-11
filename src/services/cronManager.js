@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 
-import { createSuggestionsSummary } from '@utilities/helpers';
+import { createSuggestionsSummary, downloadMatchesForAllLeagues } from '@utilities/helpers';
 import Backup from '@services/backup';
 
 class CronManager {
@@ -13,6 +13,12 @@ class CronManager {
   initSuggestionsSummary = async () => {
     cron.schedule('0 0 0 * * Tue,Thu,Sat', () => { // Every Tuesday, Thursday, Saturday
       createSuggestionsSummary();
+    });
+  }
+
+  downloadMatches = async () => {
+    cron.schedule('0 0 0 * * *', async () => { // Everyday midnight
+      await downloadMatchesForAllLeagues();
     });
   }
 }

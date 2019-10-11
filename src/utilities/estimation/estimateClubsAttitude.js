@@ -46,6 +46,13 @@ const estimateClubsAttitude = async ({
   const firstClub = firstClubId ? await Club.findById(firstClubId) : null;
   const secondClub = secondClubId ? await Club.findById(secondClubId) : null;
 
+  if (
+    (!firstClub || firstClub.tier === 0)
+    && (!secondClub || secondClub.tier === 0)
+  ) {
+    return results.UNIMPORTANT;
+  }
+
   if (!firstClub || !secondClubId) { // One club is completely unimportant
     const onlyClub = firstClub || secondClub;
 

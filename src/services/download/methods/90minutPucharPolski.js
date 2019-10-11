@@ -11,34 +11,7 @@ import { getUpcomingRoundHeader, getMatchesFromHeader } from './90minutHelpers';
 moment.locale('pl');
 const requestPromisify = promisify(request);
 
-/* --------------- */
-/* Clubs */
-/* --------------- */
-const clubs = async (url, additional = {}) => {
 
-  const { body } = await requestPromisify(url, {
-    encoding: null,
-  });
-
-  const html = iconv.decode(Buffer.from(body), 'ISO-8859-2');
-
-  const base$ = $.load(html);
-
-  const rows = base$('.main2').first().find('tbody tr').not(':nth-child(1), :nth-child(2), :nth-child(3), :nth-child(4)');
-
-  const clubsNames = rows.map((_, row) => $(row)
-    .find('td')
-    .eq(1)
-    .find('a')
-    .text()).get();
-
-  return clubsNames;
-};
-
-
-/* --------------- */
-/* Matches */
-/* --------------- */
 const matches = async (url, additional = {}) => {
   const { date } = additional;
 
@@ -56,10 +29,12 @@ const matches = async (url, additional = {}) => {
 
   const paragraphs = $(container).find('p');
 
+  const headerCheckingRegex = new RegExp(/runda|finał/i);
+
   const roundHeaders = paragraphs.filter((_, paragraph) => {
     const headerText = $(paragraph).find('table > tbody > tr:first-child > td:first-child b u').text();
 
-    if (headerText.includes('Kolejka')) {
+    if (headerText.match(headerCheckingRegex)) {
       const parts = headerText.split(' - '); // Split between (Kolejka X - Date)
 
       if (parts.length > 1) return true;
@@ -68,20 +43,13 @@ const matches = async (url, additional = {}) => {
     return false;
   });
 
-  const upcomingRoundHeader = getUpcomingRoundHeader(roundHeaders, date); // Next Round
-  const nextUpcomingRoundHeader = getUpcomingRoundHeader(roundHeaders, moment(date).add(7, 'days').toDate()); // One after next round
+  const upcomingRoundHeader = getUpcomingRoundHeader(roundHeaders, date);
 
-  const roundMatchesForFirst = getMatchesFromHeader(upcomingRoundHeader);
-  const roundMatchesForSecond = getMatchesFromHeader(nextUpcomingRoundHeader);
-
-  const roundMatches = $(upcomingRoundHeader).text().trim() === $(nextUpcomingRoundHeader).text().trim()
-    ? roundMatchesForFirst
-    : [...roundMatchesForFirst, ...roundMatchesForSecond];
+  const roundMatches = getMatchesFromHeader(upcomingRoundHeader);
 
   return _uniqBy(roundMatches.filter(match => !!match), ({ homeClubName, awayClubName, date: matchDate }) => [homeClubName, awayClubName, matchDate].join());
 };
 
 export default {
-  clubs,
   matches,
 };

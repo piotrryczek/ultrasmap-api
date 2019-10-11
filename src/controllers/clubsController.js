@@ -798,7 +798,7 @@ class ClubsController {
           { transliterationName: searchRegExp },
         ],
       },
-    );
+    ).limit(10);
 
     ctx.body = {
       data: clubs,

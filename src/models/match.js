@@ -3,11 +3,17 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const MatchSchema = new Schema({
+  retrievedHomeClubName: {
+    type: Schema.Types.String,
+  },
   homeClub: {
     type: Schema.Types.ObjectId,
     ref: 'Club',
   },
   unimportantHomeClubName: {
+    type: Schema.Types.String,
+  },
+  retrievedAwayClubName: {
     type: Schema.Types.String,
   },
   awayClub: {
@@ -42,6 +48,10 @@ const MatchSchema = new Schema({
   date: {
     type: Schema.Types.Date,
   },
+  locationNotSure: {
+    type: Schema.Types.Boolean,
+    default: false,
+  },
   location: {
     type: {
       type: String,
@@ -50,6 +60,7 @@ const MatchSchema = new Schema({
     },
     coordinates: {
       type: [Number],
+      default: [0, 0],
     },
   },
   isVisible: {

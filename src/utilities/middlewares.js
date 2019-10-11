@@ -98,7 +98,7 @@ export const corsHandler = (ctx) => {
   if (process.env.ALLOW_CORS_LOCALHOST === '1') acceptedOrigins.push('http://localhost:3000', 'http://localhost:3001');
 
   const { accept: { headers: { origin } } } = ctx;
-  if (!acceptedOrigins.includes(origin)) {
+  if (origin && !acceptedOrigins.includes(origin)) {
     return ctx.throw(`${origin} CORS error`);
   }
 

@@ -12,4 +12,5 @@ import app from './app';
 app.listen(5000, () => {
   cronManager.initBackups();
   cronManager.initSuggestionsSummary();
+  cronManager.downloadMatches();
 });

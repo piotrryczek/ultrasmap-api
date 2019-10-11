@@ -4,10 +4,14 @@ import _isEmpty from 'lodash/isEmpty';
 
 import Match from '@models/match';
 import Club from '@models/club';
+import League from '@models/league';
 
 import { PER_PAGE_MATCHES } from '@config/config';
 import { parseSearchQuery } from '@utilities/helpers';
 
+import util from 'util';
+
+// db.matches.update({ 'location.coordinates': [] }, { $set: { 'location.coordinates' : [0,0] } }, { multi: true} )
 class MatchesController {
   list = async (ctx) => {
     const { queryParsed } = ctx;
@@ -16,35 +20,92 @@ class MatchesController {
       page = 1,
       search = {},
       filters = {},
+      sort = null,
     } = queryParsed;
 
     const parsedSearch = parseSearchQuery(search);
+    const queryOptions = {
+      skip: (page - 1) * PER_PAGE_MATCHES,
+      limit: PER_PAGE_MATCHES,
+    };
 
     const {
-      date,
+      dateFrom,
+      dateTo,
+      attitudeFrom,
+      attitudeTo,
       isVisible,
       lackOf,
+      clubs = [],
+      league = null,
+      leagueTiers = [],
+      radius = null,
+      radiusFrom = null,
     } = filters;
 
-    if (!_isEmpty(date)) {
-      const { type, time } = date;
+    Object.assign(parsedSearch, {
+      'location.coordinates': { $ne: [0, 0] },
+    });
 
-      const dateToCompare = new Date(parseInt(time, 10));
+    if (sort) {
+      const [sortName, sortDirection] = Object.entries(sort)[0];
 
-      if (type === 'after') {
-        Object.assign(parsedSearch, {
-          date: { $lt: dateToCompare },
-        });
-      } else { // Before
-        Object.assign(parsedSearch, {
-          date: { $gt: dateToCompare },
+      if (sortDirection) {
+        Object.assign(queryOptions, {
+          sort: {
+            [sortName]: sortDirection,
+          },
         });
       }
+    }
+
+    if (dateFrom && dateTo) {
+      const dateToCompareFrom = new Date(parseInt(dateFrom, 10));
+      const dateToCompareTo = new Date(parseInt(dateTo, 10));
+
+      Object.assign(parsedSearch, {
+        date: {
+          $lt: dateToCompareTo,
+          $gt: dateToCompareFrom,
+        },
+      });
+    } else if (dateFrom) {
+      const dateToCompareFrom = new Date(parseInt(dateFrom, 10));
+
+      Object.assign(parsedSearch, {
+        date: { $gt: dateToCompareFrom },
+      });
+    } else if (dateTo) {
+      const dateToCompareTo = new Date(parseInt(dateTo, 10));
+
+      Object.assign(parsedSearch, {
+        date: { $lt: dateToCompareTo },
+      });
     }
 
     if (isVisible) {
       Object.assign(parsedSearch, {
         isVisible,
+      });
+    }
+
+    if (
+      !isNaN(parseFloat(attitudeFrom))
+      && !isNaN(parseFloat(attitudeTo))
+    ) {
+      Object.assign(parsedSearch, {
+        attitude: {
+          $gte: parseFloat(attitudeFrom),
+          $lte: parseFloat(attitudeTo),
+        },
+      });
+    } else if (!isNaN(parseFloat(attitudeFrom))) {
+      Object.assign(parsedSearch, {
+        attitude: { $gte: parseFloat(attitudeFrom) },
+      });
+    } else if (!isNaN(parseFloat(attitudeTo))) {
+      Object.assign(parsedSearch, {
+        attitude: { $lte: parseFloat(attitudeTo) },
       });
     }
 
@@ -57,30 +118,78 @@ class MatchesController {
 
       if (lackOf === 'location') {
         Object.assign(parsedSearch, {
-          'location.coordinates': { $size: 0 },
+          'location.coordinates': [0, 0],
         });
       }
     }
 
-    const matches = await Match.find(
-      parsedSearch,
-      null,
-      {
-        skip: (page - 1) * PER_PAGE_MATCHES,
-        limit: PER_PAGE_MATCHES,
-      },
-    )
-      .populate('homeClub')
-      .populate('awayClub')
-      .populate('league')
-      .sort({ date: 'descending' });
+    if (clubs.length) {
+      Object.assign(parsedSearch, {
+        $or: [
+          { homeClub: { $in: clubs } },
+          { awayClub: { $in: clubs } }
+        ],
+      });
+    }
 
-    const allCount = await Match.countDocuments(parsedSearch);
+    if (league) {
+      Object.assign(parsedSearch, {
+        league,
+      });
+    }
 
-    ctx.body = {
+    if (leagueTiers.length) {
+      const leagues = await League.find({ tier: { $in: leagueTiers } });
+
+      Object.assign(parsedSearch, {
+        league: { $in: leagues },
+      });
+    }
+
+    // TODO: Refactor into proper conditional pipeline
+    let matches;
+    let allCount = null;
+    if (radius && radiusFrom) {
+      matches = await Match.find(
+        parsedSearch,
+        null,
+        queryOptions,
+      )
+        .where('location')
+        .near({
+          center: {
+            coordinates: [parseFloat(radiusFrom.longitude), parseFloat(radiusFrom.latitude)],
+            type: 'Point',
+          },
+          maxDistance: radius * 1000,
+        })
+        .populate('homeClub')
+        .populate('awayClub')
+        .populate('league')
+    } else {
+      matches = await Match.find(
+        parsedSearch,
+        null,
+        queryOptions,
+      )
+        .populate('homeClub')
+        .populate('awayClub')
+        .populate('league');
+
+      allCount = await Match.countDocuments(parsedSearch);
+    }
+
+    const response = {
       data: matches,
-      allCount,
     };
+
+    if (Number.isInteger(allCount)) {
+      Object.assign(response, {
+        allCount,
+      });
+    }
+
+    ctx.body = response;
   }
 
   add = async (ctx) => {

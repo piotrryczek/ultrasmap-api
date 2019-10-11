@@ -1,19 +1,12 @@
-import { promisify } from 'util';
-import request from 'request';
-
 import { PER_PAGE } from '@config/config';
 
 import Club from '@models/club';
 import League from '@models/league';
-import Match from '@models/match';
 
-import { getRelationsToEdit } from '@utilities/helpers';
+import { getRelationsToEdit, downloadMatchesForAllLeagues } from '@utilities/helpers';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
 import download from '@services/download/download';
-import estimateClubsAttitude from '@utilities/estimation/estimateClubsAttitude';
-
-const requestPromisify = promisify(request);
 
 class LeaguesController {
   get = async (ctx) => {
@@ -234,75 +227,35 @@ class LeaguesController {
       },
       request: {
         body: {
-          date = Date.now(), // TODO: Przetestuj
+          date = Date.now(),
         },
       },
     } = ctx;
 
     const league = await League.findById(leagueId);
-
     const {
-      downloadMethod,
-      downloadUrl,
-    } = league;
-
-    const matches = await download(downloadMethod, downloadUrl, 'matches', {
-      date,
-    });
-    
-    await Promise.all(matches.map(({ homeClub, awayClub, date: matchDateTimestamp }) => new Promise(async (resolve, reject) => {
-      try {
-        const maybeFoundHomeClub = await Club.findByName(homeClub);
-        const maybeFoundAwayClub = await Club.findByName(awayClub);
-
-        if (!maybeFoundHomeClub && !maybeFoundAwayClub) resolve();
-
-        const finalDate = new Date(parseInt(matchDateTimestamp, 10));
-
-        const isHomeClubReserve = maybeFoundHomeClub !== null && maybeFoundHomeClub.isReserve;
-        const isAwayClubReserve = maybeFoundAwayClub !== null && maybeFoundAwayClub.isReserve;
-
-        const result = await estimateClubsAttitude({
-          firstClubId: maybeFoundHomeClub === null ? null : maybeFoundHomeClub.club._id.toString(),
-          secondClubId: maybeFoundAwayClub === null ? null : maybeFoundAwayClub.club._id.toString(),
-          isFirstClubReserve: isHomeClubReserve,
-          isSecondClubReserve: isAwayClubReserve,
-          league,
-        });
-
-        const {
-          importance,
-          attitude,
-          level,
-        } = result;
-
-        const location = maybeFoundHomeClub ? maybeFoundHomeClub.club.location : null;
-
-        const match = new Match({
-          homeClub: maybeFoundHomeClub ? maybeFoundHomeClub.club : null,
-          isHomeClubReserve,
-          unimportantHomeClubName: maybeFoundHomeClub ? '' : homeClub,
-          awayClub: maybeFoundAwayClub ? maybeFoundAwayClub.club : null,
-          isAwayClubReserve,
-          unimportantAwayClubName: maybeFoundAwayClub ? '' : awayClub,
-          importance,
-          attitude,
-          league: leagueId,
-          date: finalDate,
-          attitudeEstimationLevel: level,
-          location,
-        });
-
-        await match.save();
-
-        resolve();
-      } catch (error) {
-        reject(new ApiError(errorCodes.Internal, error));
-      }
-    })));
+      added,
+      updated,
+      matches,
+    } = await league.downloadMatches(date);
 
     ctx.body = {
       data: matches,
+      added,
+      updated,
+    };
+  }
+
+  downloadMatchesForAll = async (ctx) => {
+    const {
+      added,
+      updated,
+    } = await downloadMatchesForAllLeagues();
+
+    ctx.body = {
+      success: true,
+      added,
+      updated,
     };
   }
 
@@ -321,10 +274,10 @@ class LeaguesController {
       try {
         const club = await Club.findByName(clubName);
 
-        resolve(club)
+        resolve(club);
       } catch (error) {
         reject(new ApiError(errorCodes.Internal, error));
-      }      
+      }
     })));
 
     ctx.body = {

@@ -1,6 +1,7 @@
 /* eslint-disable func-names */
 import _ from 'lodash';
 import _uniq from 'lodash/uniq';
+import stringSimilarity from 'string-similarity';
 
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
@@ -141,9 +142,17 @@ ClubSchema.statics.findByName = async function (search) {
 
   if (maybeFoundClub) return { club: maybeFoundClub, isReserve: false };
 
-  const searchParts = search.split(/ |-/);
+  const cleanedSearch = search.replace(new RegExp(/\(|\)/, 'g'), '');
+  const searchParts = cleanedSearch.split(/ |-/);
 
-  const isReserve = searchParts.some(searchPart => searchPart === 'II');
+  const isReserve = searchParts.some(searchPart => (searchPart === 'II' || searchPart === 'III'));
+
+  const searchPartsWithoutNumbers = searchParts.filter((part) => {
+    const maybeNumber = parseInt(part, 10);
+    const maybeLatinNumber = (part === 'II' || part === 'III');
+
+    return !maybeNumber && !maybeLatinNumber;
+  });
 
   const partResults = await Promise.all(searchParts.map(part => new Promise(async (resolve, reject) => {
     try {
@@ -169,8 +178,6 @@ ClubSchema.statics.findByName = async function (search) {
     return acc;
   }, [])];
 
-  if (searchParts.length > 2 && finalResults.length < 3) return null;
-
   const groupedById = _.chain(finalResults)
     .groupBy(club => club.id.toString())
     .map((value, key) => ({ id: key, nrClubs: value.length }))
@@ -178,11 +185,38 @@ ClubSchema.statics.findByName = async function (search) {
     .reverse()
     .value();
 
+  if (!groupedById.length) return null;
+
+  // Possibly use String Similarity for all situations
+  if (searchPartsWithoutNumbers.length === 1) {
+    const names = finalResults.map(({ name }) => name);
+    const matches = stringSimilarity.findBestMatch(search, names);
+    const { bestMatch: { target } } = matches;
+
+    return {
+      club: finalResults.find(result => result.name === target),
+      isReserve,
+    };
+  }
+
   const [foundGroupedItem] = groupedById;
-  const { id: foundId } = foundGroupedItem;
+  const { id: foundId, nrClubs } = foundGroupedItem;
+
+  const foundClub = finalResults.find(result => result.id.toString() === foundId);
+
+  if (
+    (searchPartsWithoutNumbers.length === 2 && nrClubs < 2)
+    || (searchPartsWithoutNumbers.length >= 3 && nrClubs < 3)
+  ) {
+    const { name } = foundClub;
+    
+    const result = stringSimilarity.compareTwoStrings(name, search);
+
+    if (result < 0.91) return null;
+  }
 
   return {
-    club: finalResults.find(result => result.id.toString() === foundId),
+    club: foundClub,
     isReserve,
   };
 };

@@ -31,6 +31,12 @@ router.post(
   hasCredential('updateLeague'),
   LeaguesController.add,
 );
+router.post(
+  '/downloadMatches',
+  retrieveUser,
+  hasCredential('updateLeague'),
+  LeaguesController.downloadMatchesForAll,
+);
 router.put(
   '/:leagueId',
   retrieveUser,

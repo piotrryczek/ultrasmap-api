@@ -2,6 +2,8 @@ import _intersection from 'lodash/intersection';
 import _cloneDeep from 'lodash/cloneDeep';
 import _set from 'lodash/set';
 import fromEntries from 'object.fromentries';
+import { promisify } from 'util';
+import request from 'request';
 
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
@@ -12,6 +14,9 @@ import User from '@models/user';
 import Activity from '@models/activity';
 import Suggestion from '@models/suggestion';
 import EmailSender from '@services/emailSender';
+import League from '@models/league';
+
+const requestPromisify = promisify(request);
 
 export const convertObjectsIdsToStrings = (objectsIds = []) => objectsIds.map(objectId => objectId.toString());
 
@@ -172,4 +177,59 @@ export const fillRelationshipsClubsByIdForActivity = (activity, clubs) => {
   if (afterDerbyRivalries && afterDerbyRivalries.length) _set(activity, 'after.derbyRivalries', clubIdsToObjects(afterDerbyRivalries, clubs));
   if (afterSatellites && afterSatellites.length) _set(activity, 'after.satellites', clubIdsToObjects(afterSatellites, clubs));
   if (afterSatelliteOf) _set(activity, 'after.satelliteOf', clubs.find(club => club._id.toString() === afterSatelliteOf.toString()) || null);
+};
+
+export const downloadMatchesForAllLeagues = async () => {
+  const leagues = await League.find({
+    isAutomaticDownload: true,
+  });
+
+  const results = await Promise.all(leagues.map(league => new Promise(async (resolve, reject) => {
+    try {
+      const result = await league.downloadMatches();
+
+      resolve(result);
+    } catch (error) {
+      reject(new ApiError(errorCodes.Internal, error));
+    }
+  })));
+
+  const all = results.reduce((acc, result) => {
+    const { added, updated } = result;
+
+    acc.added += added;
+    acc.updated += updated;
+
+    return acc;
+  }, { added: 0, updated: 0 });
+
+  return {
+    added: all.added,
+    updated: all.updated,
+    leagues: results,
+  };
+};
+
+export const googleMapsSearchForAddress = async (address) => {
+  const googleMapsRequestUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${process.env.GOOGLE_MAP_API_KEY}`;
+
+  const { body } = await requestPromisify(googleMapsRequestUrl);
+
+  if (!body) return null;
+
+  const parsedResponse = JSON.parse(body);
+
+  const { results, error_message: errorMessage } = parsedResponse;
+
+  if (!results.length) {
+    if (errorMessage === 'The provided API key is expired.') {
+      return googleMapsSearchForAddress(address);
+    }
+
+    return null;
+  }
+
+  const { location } = results[0].geometry;
+
+  return location;
 };
