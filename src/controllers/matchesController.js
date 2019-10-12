@@ -7,11 +7,8 @@ import Club from '@models/club';
 import League from '@models/league';
 
 import { PER_PAGE_MATCHES } from '@config/config';
-import { parseSearchQuery } from '@utilities/helpers';
+import { parseSearchQuery, escapeRegExp } from '@utilities/helpers';
 
-import util from 'util';
-
-// db.matches.update({ 'location.coordinates': [] }, { $set: { 'location.coordinates' : [0,0] } }, { multi: true} )
 class MatchesController {
   list = async (ctx) => {
     const { queryParsed } = ctx;
@@ -41,6 +38,7 @@ class MatchesController {
       leagueTiers = [],
       radius = null,
       radiusFrom = null,
+      foundClubName = '',
     } = filters;
 
     Object.assign(parsedSearch, {
@@ -143,6 +141,17 @@ class MatchesController {
 
       Object.assign(parsedSearch, {
         league: { $in: leagues },
+      });
+    }
+
+    if (foundClubName) {
+      const foundClubNameRegex = new RegExp(escapeRegExp(foundClubName), 'i');
+
+      Object.assign(parsedSearch, {
+        $or: [
+          { retrievedHomeClubName: foundClubNameRegex },
+          { retrievedAwayClubName: foundClubNameRegex },
+        ],
       });
     }
 

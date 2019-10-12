@@ -12,6 +12,7 @@ import backupsRoutes from './backups';
 import uploadsRoutes from './uploads';
 import leaguesRoutes from './leagues';
 import matchesRoutes from './matches';
+import countriesRoutes from './countries';
 import utilitiesRoutes from './utilities';
 
 export default combineRouters(
@@ -27,5 +28,6 @@ export default combineRouters(
   uploadsRoutes,
   leaguesRoutes,
   matchesRoutes,
+  countriesRoutes,
   utilitiesRoutes,
 );

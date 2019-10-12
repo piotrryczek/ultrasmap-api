@@ -10,7 +10,6 @@ const CountrySchema = new Schema({
   leagues: [{
     type: Schema.Types.ObjectId,
     ref: 'League',
-    required: true,
   }],
 }, {
   timestamps: true,

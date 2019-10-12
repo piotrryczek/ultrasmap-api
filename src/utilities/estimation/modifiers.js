@@ -19,8 +19,8 @@ export const getTierModifier = (tier) => {
 export const getRelationTypeModifier = (relationType) => {
   switch (relationType) {
     case 'enemy': return 1.3;
-    case 'friendship': return 0.9;
-    case 'agreement': return 0.7;
+    case 'friendship': return 1;
+    case 'agreement': return 0.8;
     case 'positive': return 0.5;
     default: throw new Error('Incorrect relation');
   }
@@ -58,4 +58,3 @@ export const getDistanceModifier = (distance) => {
 6 - 0.5
 */
 export const getImportanceDiffModifier = diff => 0.3913562 + (1.191325 - 0.3913562) / (1 + ((diff / 2.791183) ** 2.23108)); // mycurvefit.com
-

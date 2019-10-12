@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 import { PER_PAGE } from '@config/config';
 
 import Club from '@models/club';
@@ -248,9 +250,17 @@ class LeaguesController {
 
   downloadMatchesForAll = async (ctx) => {
     const {
+      request: {
+        body: {
+          date = Date.now(),
+        },
+      },
+    } = ctx;
+
+    const {
       added,
       updated,
-    } = await downloadMatchesForAllLeagues();
+    } = await downloadMatchesForAllLeagues(moment(date).toDate());
 
     ctx.body = {
       success: true,

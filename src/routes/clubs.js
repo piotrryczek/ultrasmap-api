@@ -7,7 +7,7 @@ import upload from '@utilities/multer';
 const router = new Router({ prefix: '/clubs' });
 
 router.get('/', queryStringMiddleware, ClubsController.getPaginated);
-router.get('/byTier', ClubsController.getAllByTier);
+router.get('/byTier', queryStringMiddleware, ClubsController.getAllByTier);
 router.get('/geo', queryStringMiddleware, ClubsController.getWithinArea);
 router.post('/possibleRelations', ClubsController.getPossibleRelations); // POST because of query string limit
 router.get('/randomClubId', ClubsController.getRandomClubId);
@@ -58,6 +58,12 @@ router.patch(
   retrieveUser,
   hasCredential('updateClub'),
   ClubsController.bulkUpdateTiers,
+);
+router.patch(
+  '/geoCountry',
+  retrieveUser,
+  hasCredential('updateClub'),
+  ClubsController.updateCountryWithinGeo,
 );
 
 export default router;

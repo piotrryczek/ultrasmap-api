@@ -17,12 +17,12 @@ import {
 } from '@utilities/estimation/helpers';
 
 
-const SECOND_LEVEL_WAGE = 5;
-const THIRD_LEVEL_WAGE = 9;
+const SECOND_LEVEL_WAGE = 4;
+const THIRD_LEVEL_WAGE = 7;
 const FOURTH_LEVEL_WAGE = 16;
 
-const ONE_CLUB_UNIMPORTANT_DIVISION = 6;
-const RESERVE_DIVISION = 14;
+const ONE_CLUB_UNIMPORTANT_DIVISION = 1.5;
+const RESERVE_DIVISION = 20;
 
 const results = {
   UNKNOWN: 'unknown',
@@ -55,10 +55,12 @@ const estimateClubsAttitude = async ({
 
   if (!firstClub || !secondClubId) { // One club is completely unimportant
     const onlyClub = firstClub || secondClub;
+    const isOnlyClubReserve = firstClub ? isFirstClubReserve : isSecondClubReserve;
 
     const { tier } = onlyClub;
+    const onlyClubTier = isOnlyClubReserve ? tier / RESERVE_DIVISION : tier;
 
-    const importance = (tier / ONE_CLUB_UNIMPORTANT_DIVISION) * leagueImportanceModifier;
+    const importance = ((onlyClubTier / 2) * leagueImportanceModifier) / ONE_CLUB_UNIMPORTANT_DIVISION;
 
     return ({
       importance: Math.round(importance * 100) / 100,

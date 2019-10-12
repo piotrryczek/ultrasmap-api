@@ -179,14 +179,14 @@ export const fillRelationshipsClubsByIdForActivity = (activity, clubs) => {
   if (afterSatelliteOf) _set(activity, 'after.satelliteOf', clubs.find(club => club._id.toString() === afterSatelliteOf.toString()) || null);
 };
 
-export const downloadMatchesForAllLeagues = async () => {
+export const downloadMatchesForAllLeagues = async (date = new Date()) => {
   const leagues = await League.find({
     isAutomaticDownload: true,
   });
 
   const results = await Promise.all(leagues.map(league => new Promise(async (resolve, reject) => {
     try {
-      const result = await league.downloadMatches();
+      const result = await league.downloadMatches(date);
 
       resolve(result);
     } catch (error) {

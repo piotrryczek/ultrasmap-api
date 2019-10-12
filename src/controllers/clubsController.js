@@ -2,6 +2,7 @@ import _cloneDeep from 'lodash/cloneDeep';
 import _difference from 'lodash/difference';
 import _pull from 'lodash/pull';
 import _get from 'lodash/get';
+import fs from 'fs';
 
 import {
   PER_PAGE,
@@ -20,6 +21,7 @@ import ImageUpload from '@services/imageUpload';
 import Club from '@models/club';
 import League from '@models/league';
 import Activity from '@models/activity';
+import Country from '@models/country';
 
 class ClubsController {
   getPaginated = async (ctx) => {
@@ -71,7 +73,18 @@ class ClubsController {
   }
 
   getAllByTier = async (ctx) => {
-    const clubs = await Club.find({}).select('name transliterationName tier').sort({ tier: 'descending' });
+    const { queryParsed } = ctx;
+    const { countries: countriesIds } = queryParsed;
+
+    const clubsQuery = {};
+
+    if (countriesIds && countriesIds.length) {
+      Object.assign(clubsQuery, {
+        country: { $in: countriesIds },
+      });
+    }
+
+    const clubs = await Club.find(clubsQuery).select('name transliterationName tier').sort({ tier: 'descending' });
 
     ctx.body = {
       data: clubs,
@@ -105,6 +118,43 @@ class ClubsController {
     };
   }
 
+  updateCountryWithinGeo = async (ctx) => {
+    const {
+      request: {
+        body: {
+          countryFileName,
+          countryName,
+        },
+      },
+    } = ctx;
+
+    const country = await Country.findOne({ name: countryName });
+    const fileData = await fs.promises.readFile(`countries/${countryFileName}.json`);
+    const geoData = JSON.parse(fileData);
+    const { geometry: areaToSearch } = geoData;
+
+    const clubs = await Club.find({}).where('location').within(areaToSearch);
+
+    await Promise.all(clubs.map(club => new Promise(async (resolve, reject) => {
+      try {
+        Object.assign(club, {
+          country,
+        });
+  
+        await club.save();
+
+        resolve();
+      } catch (error) {
+        reject(new ApiError(errorCodes.Internal, error));
+      }
+    })));
+
+    ctx.body = {
+      success: true,
+      updated: clubs.length,
+    };
+  }
+
   getRandomClubId = async (ctx) => {
     const count = await Club.countDocuments();
     const random = Math.floor(Math.random() * count);
@@ -128,7 +178,8 @@ class ClubsController {
       .populate('enemies')
       .populate('derbyRivalries')
       .populate('satelliteOf')
-      .populate('league');
+      .populate('league')
+      .populate('country');
 
     ctx.body = {
       data: club,
@@ -159,6 +210,7 @@ class ClubsController {
       enemies: receivedEnemies = [],
       derbyRivalries: receivedDerbyRivalries = [],
       satelliteOf = null,
+      country = null,
     } = body;
 
     const isClubWithName = await Club.findOne({ name });
@@ -189,6 +241,7 @@ class ClubsController {
       enemies,
       derbyRivalries,
       satelliteOf,
+      country,
     });
 
     if (!newClub.validateRelations()) throw new ApiError(errorCodes.RelationsNotUnique);
@@ -370,6 +423,7 @@ class ClubsController {
       enemies: receivedEnemies = [],
       derbyRivalries: receivedDerbyRivalries = [],
       satelliteOf = null,
+      country,
     } = body;
 
     const isClubWithName = await Club.findOne({ name });
@@ -399,6 +453,7 @@ class ClubsController {
       enemies,
       derbyRivalries,
       satelliteOf,
+      country,
     });
 
     if (typeof transliterationName === 'string') Object.assign(clubToBeUpdated, { transliterationName });

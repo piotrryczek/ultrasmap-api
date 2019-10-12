@@ -12,7 +12,11 @@ const getDownloadMethod = (method) => {
 export default (downloadMethod, downloadUrl, dataType, additional) => {
   const methods = getDownloadMethod(downloadMethod);
 
+  if (!methods) return [];
+
   const method = dataType === 'clubs' ? methods.clubs : methods.matches;
+
+  if (!method) return [];
 
   return method(downloadUrl, additional);
 };

@@ -33,6 +33,10 @@ const ClubSchema = new Schema({
     type: Number,
     default: 3,
   },
+  country: {
+    type: Schema.Types.ObjectId,
+    ref: 'Country',
+  },
   league: {
     type: Schema.Types.ObjectId,
     ref: 'League',
