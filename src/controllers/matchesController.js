@@ -6,8 +6,11 @@ import Match from '@models/match';
 import Club from '@models/club';
 import League from '@models/league';
 
+import ApiError from '@utilities/apiError';
+import errorCodes from '@config/errorCodes';
 import { PER_PAGE_MATCHES } from '@config/config';
 import { parseSearchQuery, escapeRegExp } from '@utilities/helpers';
+import estimateClubsAttitude from '@utilities/estimation/estimateClubsAttitude';
 
 class MatchesController {
   list = async (ctx) => {
@@ -125,7 +128,7 @@ class MatchesController {
       Object.assign(parsedSearch, {
         $or: [
           { homeClub: { $in: clubs } },
-          { awayClub: { $in: clubs } }
+          { awayClub: { $in: clubs } },
         ],
       });
     }
@@ -352,8 +355,47 @@ class MatchesController {
   }
 
   recalculate = async (ctx) => {
+    const matches = await Match.find({
+      date: {
+        $gt: new Date(),
+      },
+    })
+      .populate('league');
+
+    await Promise.all(matches.map(match => new Promise(async (resolve, reject) => {
+      try {
+        const {
+          homeClub,
+          awayClub,
+          isHomeClubReserve,
+          isAwayClubReserve,
+          league,
+        } = match;
+  
+        const { importance, attitude, level } = await estimateClubsAttitude({
+          firstClubId: homeClub ? homeClub.toString() : null,
+          secondClubId: awayClub ? awayClub.toString() : null,
+          isFirstClubReserve: isHomeClubReserve,
+          isSecondClubReserve: isAwayClubReserve,
+          league,
+        });
+
+        Object.assign(match, {
+          attitude,
+          importance,
+          attitudeEstimationLevel: level,
+        });
+
+        await match.save();
+
+        resolve();
+      } catch (error) {
+        reject(new ApiError(errorCodes.Internal, error));
+      }
+    })));
+
     ctx.body = {
-      data: {},
+      success: true,
     };
   }
 }

@@ -3,7 +3,8 @@ import getDistance from 'geolib/es/getDistance';
 import {
   getImportanceModifierBasedOnAttitude,
   getDistanceModifier,
-  getTierModifier,
+  // getTierModifier,
+  getTierDiffModiifer,
   getRelationTypeModifier,
 } from '@utilities/estimation/modifiers';
 
@@ -72,7 +73,7 @@ export const prepareResult = ({
   };
 };
 
-export const getSecondLevelClubsRelationsAttitude = (clubsProRelations, secondClubId, allRelations) => clubsProRelations.reduce((acc, club) => {
+export const getSecondLevelClubsRelationsAttitude = (baseClubTier, clubsProRelations, secondClubId, allRelations) => clubsProRelations.reduce((acc, club) => {
   const {
     _id: clubId,
     tier,
@@ -95,11 +96,13 @@ export const getSecondLevelClubsRelationsAttitude = (clubsProRelations, secondCl
     const { relation: relationOrigin } = allRelations.find(relation => relation.id === clubId.toString());
     const { relation } = maybeFoundRelationSecondLevel;
 
-    const tierModifier = getTierModifier(tier);
+    // const tierModifier = getTierModifier(tier);
+    const tierDiff = tier - baseClubTier;
+    const tierDiffModifier = 1 + getTierDiffModiifer(tierDiff);
     const relationOriginTypeModifier = getRelationTypeModifier(relationOrigin);
     const relationTypeModifier = getRelationTypeModifier(relation);
 
-    const finalModifier = tierModifier * relationOriginTypeModifier * relationTypeModifier;
+    const finalModifier = tierDiffModifier * relationOriginTypeModifier * relationTypeModifier;
 
     acc.push({
       attitude: convertRelationToAttitude(relation),

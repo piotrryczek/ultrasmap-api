@@ -233,3 +233,13 @@ export const googleMapsSearchForAddress = async (address) => {
 
   return location;
 };
+
+export const getRelationsSum = (club) => {
+  const { friendships = [], agreements = [], positives = [], satellites = [], enemies = [], satelliteOf } = club;
+
+  let sum = friendships.length + agreements.length + positives.length + satellites.length + enemies.length;
+
+  if (satelliteOf) sum += 1;
+
+  return sum;
+};

@@ -5,7 +5,7 @@ import Backup from '@services/backup';
 
 class CronManager {
   initBackups = async () => {
-    cron.schedule('0 0 */6 * * *', () => { // Every six hours
+    cron.schedule('0 0 0 * * *', () => { // Everyday midnight
       Backup.create();
     });
   }

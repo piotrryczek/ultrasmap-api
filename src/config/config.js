@@ -12,3 +12,4 @@ export const relationTypes = {
   positive: 'positive',
   satellite: 'satellite',
 };
+export const EXCEPTIONS_UNIMPORTANT_CLUBS_NAMES = ['Odra Centrum Wodzisław Śląski'];

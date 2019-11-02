@@ -180,6 +180,12 @@ LeagueSchema.methods.downloadMatches = async function (date = new Date()) {
         }
       }
 
+      if (isHomeClubReserve) {
+        Object.assign(match, {
+          locationNotSure: true,
+        });
+      }
+
       await match.save();
 
       return resolve('add');

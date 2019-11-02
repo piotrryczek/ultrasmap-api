@@ -6,6 +6,7 @@ import stringSimilarity from 'string-similarity';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
 import { escapeRegExp } from '@utilities/helpers';
+import { EXCEPTIONS_UNIMPORTANT_CLUBS_NAMES } from '@config/config';
 
 import mongoose from 'mongoose';
 
@@ -142,6 +143,8 @@ ClubSchema.post('remove', async function (document, next) {
 });
 
 ClubSchema.statics.findByName = async function (search) {
+  if (EXCEPTIONS_UNIMPORTANT_CLUBS_NAMES.includes(search)) return null;
+
   const maybeFoundClub = await this.findOne({ name: search });
 
   if (maybeFoundClub) return { club: maybeFoundClub, isReserve: false };

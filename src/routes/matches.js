@@ -16,6 +16,12 @@ router.post(
   hasCredential('updateMatch'),
   MatchesController.add,
 );
+router.patch(
+  '/recalculate',
+  retrieveUser,
+  hasCredential('updateMatch'),
+  MatchesController.recalculate,
+);
 router.put(
   '/:matchId',
   retrieveUser,

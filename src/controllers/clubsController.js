@@ -12,6 +12,7 @@ import {
   getRelationsToEdit,
   parseSearchQuery,
   singleClubDelete,
+  getRelationsSum,
 } from '@utilities/helpers';
 import ApiError from '@utilities/apiError';
 import errorCodes from '@config/errorCodes';
@@ -935,6 +936,39 @@ class ClubsController {
 
     ctx.body = {
       data: maybeFoundClub || false,
+    };
+  }
+
+  getAllByRelations = async (ctx) => {
+    const { queryParsed } = ctx;
+    const { countries: countriesIds } = queryParsed;
+
+    const clubsQuery = {};
+
+    if (countriesIds && countriesIds.length) {
+      Object.assign(clubsQuery, {
+        country: { $in: countriesIds },
+      });
+    }
+
+    const clubs = await Club.find(clubsQuery)
+      .populate('friendships')
+      .populate('agreements')
+      .populate('positives')
+      .populate('satellites')
+      .populate('enemies')
+      .populate('derbyRivalries')
+      .populate('satelliteOf');
+
+    clubs.sort((clubA, clubB) => {
+      const clubASum = getRelationsSum(clubA);
+      const clubBSum = getRelationsSum(clubB);
+
+      return clubASum > clubBSum ? -1 : 1;
+    });
+
+    ctx.body = {
+      data: clubs,
     };
   }
 }

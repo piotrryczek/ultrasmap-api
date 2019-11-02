@@ -16,6 +16,23 @@ export const getTierModifier = (tier) => {
   return tierModifier;
 };
 
+/*
+-3 - -1
+-2 - -0,8
+-1 - -0,5
+0 - 0
+1 - 0,25
+2 - 0,45
+3 - 0,55
+4 - 0,6
+*/
+export const getTierDiffModiifer = (tier) => {
+  // eslint-disable-next-line no-mixed-operators
+  const tierDiffModifier = -0.04991883 + 0.3717758 * tier - 0.04398674 * tier ** 2 - 0.01284722 * tier ** 3 + 0.002698864 * tier ** 4;
+
+  return tierDiffModifier;
+}
+
 export const getRelationTypeModifier = (relationType) => {
   switch (relationType) {
     case 'enemy': return 1.3;
@@ -29,18 +46,27 @@ export const getRelationTypeModifier = (relationType) => {
 export const getImportanceModifierBasedOnAttitude = (attitude) => {
   if (attitude === 50) return 1;
 
-  const finalModifier = attitude > 50 ? 0.15 : 0.3; // For negative importance is higher
+  const finalModifier = attitude > 50 ? 0.2 : 0.4; // For negative importance is higher
 
   return 1 + (((1 - attitude / 50) ** 2) * finalModifier); // further from neutral the more important is match
 };
 
+/*
+max: 1,4
+min: 1
+
+0 - 1.45
+10 - 1,4
+20 - 1,3
+50 - 1,2
+100 - 1,1
+200 - 1
+*/
 export const getDistanceModifier = (distance) => {
-  const maxModifier = 1.2;
+  const maxModifier = 1.4;
   const minModifier = 1;
 
-  if (distance === 0) return maxModifier;
-
-  const modifier = 1 + (1 - (Math.log(distance ** 1.7) / 10));
+  const modifier = 0.9327006 + (1.453068 - 0.9327006) / (1 + ((distance / 49.86131) ** 1.169678)); // mycurvefit.com
 
   if (modifier > maxModifier) return maxModifier;
   if (modifier < minModifier) return minModifier;

@@ -4,6 +4,7 @@ import errorCodes from '@config/errorCodes';
 
 import {
   getTierModifier,
+  getTierDiffModiifer,
   getRelationTypeModifier,
   getImportanceDiffModifier,
 } from '@utilities/estimation/modifiers';
@@ -101,7 +102,11 @@ const estimateClubsAttitude = async ({
   };
 
   const importanceDiffModifier = getImportanceDiffModifier(Math.abs(firstClubTierForImportance - secondClubTierForImportance)); // smaller diff bigger importance and opposite
-  const importance = ((firstClubTierForImportance + secondClubTierForImportance) / 2) * importanceDiffModifier * leagueImportanceModifier;
+  const importanceAwayReserveModifier = isSecondClubReserve ? 0.4 : 1;
+  const importance = ((firstClubTierForImportance + secondClubTierForImportance) / 2)
+    * importanceDiffModifier
+    * leagueImportanceModifier
+    * importanceAwayReserveModifier;
   const additional = [];
 
   if (derbyRivalries.includes(secondClubId)) {
@@ -238,8 +243,8 @@ const estimateClubsAttitude = async ({
   });
 
 
-  const secondLevelFirstClubsRelationsAttitude = getSecondLevelClubsRelationsAttitude(firstClubsProRelations, secondClubId, allFirstClubRelations);
-  const secondLevelSecondClubsRelationsAttitude = getSecondLevelClubsRelationsAttitude(secondClubsProRelations, firstClubId, allSecondClubRelations);
+  const secondLevelFirstClubsRelationsAttitude = getSecondLevelClubsRelationsAttitude(firstClubTier, firstClubsProRelations, secondClubId, allFirstClubRelations);
+  const secondLevelSecondClubsRelationsAttitude = getSecondLevelClubsRelationsAttitude(secondClubTier, secondClubsProRelations, firstClubId, allSecondClubRelations);
 
   const secondLevelRelationsAttitudes = [
     ...secondLevelFirstClubsRelationsAttitude,
@@ -313,6 +318,7 @@ const estimateClubsAttitude = async ({
           ? {
             ...result, // importance, attitude
             relationType: allFirstClubRelations.find(relation => relation.id === clubId).relation,
+            baseClubTier: firstClubTier,
           }
           : null;
 
@@ -336,6 +342,7 @@ const estimateClubsAttitude = async ({
           ? {
             ...result, // importance, attitude
             relationType: allSecondClubRelations.find(relation => relation.id === clubId).relation,
+            baseClubTier: secondClubTier,
           }
           : null;
 
@@ -350,13 +357,17 @@ const estimateClubsAttitude = async ({
     if (finalProResults.length) {
       const attitudeAvg = finalProResults.reduce((acc, result) => {
         const {
+          baseClubTier,
           importance: currentImportance,
           attitude: currentAttitude,
           relationType: currentRelationType,
         } = result;
 
+        const tierDiff = currentImportance - baseClubTier;
+
         const currentStrength = currentImportance
-          * getTierModifier(currentImportance) // Consider strength of the club
+          // * getTierModifier(currentImportance) // Consider strength of the club
+          * (1 + getTierDiffModiifer(tierDiff)) // Consider strength difference between base club and this club
           * getRelationTypeModifier(currentRelationType); // Consider type of the relation
 
         const { value, strength } = acc;
@@ -448,6 +459,8 @@ const estimateClubsAttitude = async ({
     const finalProResults = proResults.filter(result => result !== null);
 
     if (finalProResults.length) {
+      baseAttitude = 50; // reset
+
       const attitudeAvg = finalProResults.reduce((acc, result) => {
         const {
           importance: currentImportance,
